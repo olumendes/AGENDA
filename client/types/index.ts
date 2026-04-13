@@ -1,4 +1,5 @@
 export type BidStatus = "codificado" | "questionamento" | "won" | "lost" | "nao_temos";
+export type BidType = "chamamento_publico" | "dispensa_eletronica" | "pregao_eletronico" | "pregao_presencial";
 
 export interface BidItem {
   id: string;
@@ -10,6 +11,8 @@ export interface BidItem {
 export interface Bid {
   id: string;
   title: string; // TIPO + NÚMERO - PRODUTOS (PORTAL)
+  bidType: BidType;
+  bidNumber: string;
   observation: string; // Nome do órgão + complementos + número do processo
   disputeDate: Date;
   disputeTime: string; // HH:mm format

@@ -1,7 +1,7 @@
 import { Bid } from "@/types";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getBidColor } from "@/lib/bid-utils";
+import { getBidColor, formatBidTitle } from "@/lib/bid-utils";
 
 interface MonthViewProps {
   date: Date;
@@ -112,9 +112,9 @@ export function MonthView({
                         e.stopPropagation();
                         onSelectBid(bid);
                       }}
-                      title={bid.title}
+                      title={formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}
                     >
-                      {bid.title.substring(0, 20)}
+                      {formatBidTitle(bid.bidType, bid.bidNumber, bid.portal).substring(0, 20)}
                     </div>
                   ))}
                   {daysForDate.length > 2 && (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bid, BidStatus, BidAttachment } from "@/types";
+import { Bid, BidStatus, BidAttachment, BidType } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -51,6 +51,15 @@ const BRAZILIAN_STATES = [
   "TO",
 ];
 
+const BID_TYPE_OPTIONS: BidType[] = ["chamamento_publico", "dispensa_eletronica", "pregao_eletronico", "pregao_presencial"];
+
+const BID_TYPE_LABELS: Record<BidType, string> = {
+  chamamento_publico: "Chamamento Público",
+  dispensa_eletronica: "Dispensa Eletrônica",
+  pregao_eletronico: "Pregão Eletrônico",
+  pregao_presencial: "Pregão Presencial",
+};
+
 const STATUS_OPTIONS: BidStatus[] = ["codificado", "questionamento", "won", "lost", "nao_temos"];
 
 export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
@@ -58,6 +67,8 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
     bid || {
       id: Date.now().toString(),
       title: "",
+      bidType: "pregao_eletronico",
+      bidNumber: "",
       observation: "",
       disputeDate: new Date(),
       disputeTime: "09:00",
@@ -104,16 +115,45 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
           <CardTitle>Informações da Licitação</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Título (TIPO + NÚMERO - PRODUTOS (PORTAL))
-            </label>
-            <Input
-              value={formData.title}
-              onChange={(e) => handleChange("title", e.target.value)}
-              placeholder="ex: PREGÃO Nº 123 - PRODUTOS (ComprasNet)"
-              className="mt-1"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700">Tipo</label>
+              <Select
+                value={formData.bidType}
+                onValueChange={(value) =>
+                  handleChange("bidType", value as BidType)
+                }
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {BID_TYPE_OPTIONS.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {BID_TYPE_LABELS[type]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700">Número</label>
+              <Input
+                value={formData.bidNumber}
+                onChange={(e) => handleChange("bidNumber", e.target.value)}
+                placeholder="ex: 123"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700">Portal</label>
+              <Input
+                value={formData.portal}
+                onChange={(e) => handleChange("portal", e.target.value)}
+                placeholder="ex: ComprasNet, BLL, Licitanet"
+                className="mt-1"
+              />
+            </div>
           </div>
 
           <div>
@@ -153,16 +193,6 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                 className="mt-1"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">Portal</label>
-            <Input
-              value={formData.portal}
-              onChange={(e) => handleChange("portal", e.target.value)}
-              placeholder="ex: ComprasNet, BLL, Licitanet"
-              className="mt-1"
-            />
           </div>
         </CardContent>
       </Card>
