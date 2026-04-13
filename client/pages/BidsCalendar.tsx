@@ -87,11 +87,34 @@ export default function BidsCalendar() {
 
   const getFilteredBids = () => {
     return bids.filter((bid) => {
+      const searchLower = searchQuery.toLowerCase();
+
       const matchesSearch =
         searchQuery === "" ||
-        `${bid.bidNumber}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        bid.bidType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        bid.observation.toLowerCase().includes(searchQuery.toLowerCase());
+        `${bid.bidNumber}`.toLowerCase().includes(searchLower) ||
+        bid.bidType.toLowerCase().includes(searchLower) ||
+        bid.portal.toLowerCase().includes(searchLower) ||
+        bid.city.toLowerCase().includes(searchLower) ||
+        bid.notes.toLowerCase().includes(searchLower) ||
+        bid.disputeDate.toLocaleDateString("pt-BR").includes(searchLower) ||
+        // Buscar nos itens cadastrados
+        bid.items.itemsRegistered.some((item) =>
+          item.description.toLowerCase().includes(searchLower) ||
+          item.code.toLowerCase().includes(searchLower) ||
+          item.number.toLowerCase().includes(searchLower)
+        ) ||
+        // Buscar nos itens ganhos
+        bid.items.itemsWon.some((item) =>
+          item.description.toLowerCase().includes(searchLower) ||
+          item.code.toLowerCase().includes(searchLower) ||
+          item.number.toLowerCase().includes(searchLower)
+        ) ||
+        // Buscar nos itens perdidos
+        bid.items.itemsLost.some((item) =>
+          item.description.toLowerCase().includes(searchLower) ||
+          item.code.toLowerCase().includes(searchLower) ||
+          item.number.toLowerCase().includes(searchLower)
+        );
 
       const matchesState = filterState === "all" || filterState === "" || bid.state === filterState;
       const matchesCity =
