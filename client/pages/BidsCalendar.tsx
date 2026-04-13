@@ -11,6 +11,7 @@ import {
 import { Bid } from "@/types";
 import { bidStorage } from "@/lib/storage";
 import { Calendar } from "@/components/Calendar";
+import { SearchResults } from "@/components/SearchResults";
 import { BidDetail } from "@/components/BidDetail";
 import { BidForm } from "@/components/BidForm";
 import { Plus, Settings, Search, X } from "lucide-react";
@@ -285,6 +286,12 @@ export default function BidsCalendar() {
               onClose={() => setSelectedBid(null)}
             />
           </div>
+        ) : searchQuery ? (
+          <SearchResults
+            bids={filteredBids}
+            onSelectBid={setSelectedBid}
+            onNewBid={() => setIsCreating(true)}
+          />
         ) : (
           <Calendar
             bids={filteredBids}
