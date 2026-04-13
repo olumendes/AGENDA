@@ -37,7 +37,7 @@ export function FileUpload({
           id: Date.now().toString(),
           name: file.name,
           type: "outro",
-          url: content, // In a real app, this would be uploaded to a server
+          url: content, // Em um app real, isso seria enviado para um servidor
           uploadedAt: new Date(),
         };
         onAdd(attachment);
@@ -84,10 +84,10 @@ export function FileUpload({
         <label htmlFor="file-input" className="flex flex-col items-center gap-2 cursor-pointer">
           <Upload className="h-8 w-8 text-gray-400" />
           <p className="text-sm font-medium text-gray-700">
-            Drag files here or click to select
+            Arraste arquivos aqui ou clique para selecionar
           </p>
           <p className="text-xs text-gray-500">
-            PDF, DOC, DOCX, XLS, XLSX, and images are supported
+            PDF, DOC, DOCX, XLS, XLSX e imagens são suportados
           </p>
         </label>
       </div>
@@ -96,7 +96,7 @@ export function FileUpload({
       {attachments.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-700">
-            Uploaded Files ({attachments.length})
+            Arquivos Enviados ({attachments.length})
           </h3>
           <div className="space-y-2">
             {attachments.map((attachment) => (

@@ -65,7 +65,7 @@ export function Calendar({ bids, onSelectBid, onNewBid }: CalendarProps) {
               onClick={goToToday}
               className="min-w-24"
             >
-              Today
+              Hoje
             </Button>
             <Button
               variant="outline"

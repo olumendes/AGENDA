@@ -129,29 +129,29 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       {/* Basic Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Bid Information</CardTitle>
+          <CardTitle>Informações da Licitação</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <label className="text-sm font-medium text-gray-700">
-              Title (TIPO + NÚMERO - PRODUTOS (PORTAL))
+              Título (TIPO + NÚMERO - PRODUTOS (PORTAL))
             </label>
             <Input
               value={formData.title}
               onChange={(e) => handleChange("title", e.target.value)}
-              placeholder="e.g., PREGÃO Nº 123 - PRODUTOS (ComprasNet)"
+              placeholder="ex: PREGÃO Nº 123 - PRODUTOS (ComprasNet)"
               className="mt-1"
             />
           </div>
 
           <div>
             <label className="text-sm font-medium text-gray-700">
-              Observation (Organ + Process Number)
+              Observação (Órgão + Número do Processo)
             </label>
             <Input
               value={formData.observation}
               onChange={(e) => handleChange("observation", e.target.value)}
-              placeholder="e.g., Ministry of Health - Process 001.2024"
+              placeholder="ex: Ministério da Saúde - Processo 001.2024"
               className="mt-1"
             />
           </div>
@@ -159,7 +159,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Dispute Date
+                Data da Disputa
               </label>
               <Input
                 type="date"
@@ -172,7 +172,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Dispute Time
+                Hora da Disputa
               </label>
               <Input
                 type="time"
@@ -188,7 +188,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
             <Input
               value={formData.portal}
               onChange={(e) => handleChange("portal", e.target.value)}
-              placeholder="e.g., ComprasNet, BLL, Licitanet"
+              placeholder="ex: ComprasNet, BLL, Licitanet"
               className="mt-1"
             />
           </div>
@@ -198,7 +198,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       {/* Status and Location */}
       <Card>
         <CardHeader>
-          <CardTitle>Status & Location</CardTitle>
+          <CardTitle>Status & Localização</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -213,25 +213,37 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {STATUS_OPTIONS.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-3 h-3 rounded-full ${
-                          getBidColor(status).bg
-                        }`}
-                      />
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </div>
-                  </SelectItem>
-                ))}
+                <SelectItem value="participate">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("participate").bg}`} />
+                    Participar
+                  </div>
+                </SelectItem>
+                <SelectItem value="analyzing">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("analyzing").bg}`} />
+                    Analisando
+                  </div>
+                </SelectItem>
+                <SelectItem value="won">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("won").bg}`} />
+                    Ganho
+                  </div>
+                </SelectItem>
+                <SelectItem value="lost">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("lost").bg}`} />
+                    Perdido
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="text-sm font-medium text-gray-700">Year</label>
+              <label className="text-sm font-medium text-gray-700">Ano</label>
               <Input
                 type="number"
                 value={formData.year}
@@ -240,12 +252,12 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">State (UF)</label>
+              <label className="text-sm font-medium text-gray-700">Estado (UF)</label>
               <Select value={formData.state} onValueChange={(value) =>
                 handleChange("state", value)
               }>
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select a state" />
+                  <SelectValue placeholder="Selecione um estado" />
                 </SelectTrigger>
                 <SelectContent>
                   {BRAZILIAN_STATES.map((state) => (
@@ -257,11 +269,11 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">City</label>
+              <label className="text-sm font-medium text-gray-700">Município</label>
               <Input
                 value={formData.city}
                 onChange={(e) => handleChange("city", e.target.value)}
-                placeholder="City name"
+                placeholder="Nome do município"
                 className="mt-1"
               />
             </div>
@@ -272,13 +284,13 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       {/* Notes */}
       <Card>
         <CardHeader>
-          <CardTitle>Process Journal & Notes</CardTitle>
+          <CardTitle>Diário do Processo & Anotações</CardTitle>
         </CardHeader>
         <CardContent>
           <Textarea
             value={formData.notes}
             onChange={(e) => handleChange("notes", e.target.value)}
-            placeholder="Document the bidding process here: updates, decisions, problems, strategies..."
+            placeholder="Documente o processo de licitação aqui: andamento, decisões, problemas, estratégias..."
             className="min-h-24"
           />
         </CardContent>
@@ -287,19 +299,19 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       {/* Items Management */}
       <Card>
         <CardHeader>
-          <CardTitle>Items Management</CardTitle>
+          <CardTitle>Gestão de Itens</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Registered Items */}
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-2">
-              Registered Items
+              Itens Cadastrados
             </label>
             <div className="flex gap-2 mb-2">
               <Input
                 value={newItem}
                 onChange={(e) => setNewItem(e.target.value)}
-                placeholder="Item description"
+                placeholder="Descrição do item"
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
                     handleAddItem("itemsRegistered");
@@ -334,13 +346,13 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
           {/* Won Items */}
           <div>
             <label className="text-sm font-medium text-status-won block mb-2">
-              Items Won
+              O Que Ganhamos
             </label>
             <div className="flex gap-2 mb-2">
               <Input
                 value={newItem}
                 onChange={(e) => setNewItem(e.target.value)}
-                placeholder="Item won"
+                placeholder="Item ganho"
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
                     handleAddItem("itemsWon");
@@ -372,13 +384,13 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
           {/* Lost Items */}
           <div>
             <label className="text-sm font-medium text-status-lost block mb-2">
-              Items Lost
+              O Que Perdemos
             </label>
             <div className="flex gap-2 mb-2">
               <Input
                 value={newItem}
                 onChange={(e) => setNewItem(e.target.value)}
-                placeholder="Item lost"
+                placeholder="Item perdido"
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
                     handleAddItem("itemsLost");
@@ -412,7 +424,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       {/* File Attachments */}
       <Card>
         <CardHeader>
-          <CardTitle>Attachments</CardTitle>
+          <CardTitle>Anexos</CardTitle>
         </CardHeader>
         <CardContent>
           <FileUpload
@@ -438,10 +450,10 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       {/* Form Actions */}
       <div className="flex gap-3 justify-end">
         <Button variant="outline" onClick={onCancel}>
-          Cancel
+          Cancelar
         </Button>
         <Button onClick={handleSubmit} className="bg-primary text-white">
-          Save Bid
+          Salvar Licitação
         </Button>
       </div>
     </div>

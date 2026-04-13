@@ -32,10 +32,10 @@ export function getBidColor(status: BidStatus) {
 
 export function getStatusLabel(status: BidStatus): string {
   const labels: Record<BidStatus, string> = {
-    participate: "To Participate",
-    analyzing: "Analyzing",
-    won: "Won",
-    lost: "Lost",
+    participate: "Participar",
+    analyzing: "Analisando",
+    won: "Ganho",
+    lost: "Perdido",
   };
   return labels[status];
 }

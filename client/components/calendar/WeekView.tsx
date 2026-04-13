@@ -52,15 +52,26 @@ export function WeekView({
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
         <div className="flex">
           <div className="w-20 flex-shrink-0 bg-gray-50 border-r border-gray-200" />
-          {days.map((dayDate) => (
+          {days.map((dayDate) => {
+            const dayNames: Record<string, string> = {
+              "Sun": "Dom",
+              "Mon": "Seg",
+              "Tue": "Ter",
+              "Wed": "Qua",
+              "Thu": "Qui",
+              "Fri": "Sex",
+              "Sat": "Sab"
+            };
+            const dayStr = dayDate.toLocaleDateString("pt-BR", {
+              weekday: "short",
+            });
+            return (
             <div
               key={dayDate.toISOString()}
               className="flex-1 border-r border-gray-200 p-3 text-center"
             >
               <div className="text-sm font-semibold text-gray-900">
-                {dayDate.toLocaleDateString("pt-BR", {
-                  weekday: "short",
-                })}
+                {dayStr}
               </div>
               <div
                 className={`text-lg font-bold ${
@@ -70,7 +81,8 @@ export function WeekView({
                 {dayDate.getDate()}
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
 

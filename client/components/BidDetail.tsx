@@ -35,7 +35,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
           onClick={() => setIsEditing(false)}
           className="mb-4"
         >
-          Back to Details
+          Voltar aos Detalhes
         </Button>
         <BidForm
           bid={bid}
@@ -70,7 +70,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                 onClick={() => setIsEditing(true)}
               >
                 <Edit2 className="h-4 w-4 mr-2" />
-                Edit
+                Editar
               </Button>
               <Button
                 size="sm"
@@ -78,7 +78,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                 onClick={() => setShowDeleteDialog(true)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+                Deletar
               </Button>
               <Button
                 size="icon"
@@ -119,7 +119,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-gray-500">
-                  Dispute Date & Time
+                  Data & Hora da Disputa
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -144,20 +144,20 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
           {/* Location Info */}
           <Card>
             <CardHeader>
-              <CardTitle>Location & Year</CardTitle>
+              <CardTitle>Localização & Ano</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Year</p>
+                  <p className="text-sm text-gray-500 mb-1">Ano</p>
                   <p className="font-semibold">{bid.year}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">State</p>
+                  <p className="text-sm text-gray-500 mb-1">Estado</p>
                   <p className="font-semibold">{bid.state}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">City</p>
+                  <p className="text-sm text-gray-500 mb-1">Município</p>
                   <p className="font-semibold">{bid.city}</p>
                 </div>
               </div>
@@ -167,10 +167,10 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
           {/* Tabs for detailed content */}
           <Tabs defaultValue="notes">
             <TabsList>
-              <TabsTrigger value="notes">Process Journal</TabsTrigger>
-              <TabsTrigger value="items">Items</TabsTrigger>
-              <TabsTrigger value="attachments">Attachments</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="notes">Diário do Processo</TabsTrigger>
+              <TabsTrigger value="items">Itens</TabsTrigger>
+              <TabsTrigger value="attachments">Anexos</TabsTrigger>
+              <TabsTrigger value="history">Histórico</TabsTrigger>
             </TabsList>
 
             {/* Process Journal */}
@@ -181,7 +181,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                     <p className="whitespace-pre-wrap text-sm">{bid.notes}</p>
                   ) : (
                     <p className="text-gray-500 text-sm italic">
-                      No notes added yet
+                      Nenhuma anotação adicionada ainda
                     </p>
                   )}
                 </CardContent>
@@ -195,7 +195,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-base">
-                        Registered Items
+                        Itens Cadastrados
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -217,7 +217,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-base text-status-won">
-                        Items Won
+                        O Que Ganhamos
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -239,7 +239,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-base text-status-lost">
-                        Items Lost
+                        O Que Perdemos
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -263,7 +263,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                     <Card>
                       <CardContent className="pt-6">
                         <p className="text-gray-500 text-sm italic">
-                          No items added yet
+                          Nenhum item adicionado ainda
                         </p>
                       </CardContent>
                     </Card>
@@ -287,8 +287,8 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                               {attachment.name}
                             </p>
                             <p className="text-xs text-gray-500">
-                              {attachment.type} - Uploaded{" "}
-                              {attachment.uploadedAt.toLocaleDateString()}
+                              {attachment.type} - Enviado em{" "}
+                              {attachment.uploadedAt.toLocaleDateString("pt-BR")}
                             </p>
                           </div>
                           <Button size="sm" variant="outline">
@@ -299,7 +299,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                     </div>
                   ) : (
                     <p className="text-gray-500 text-sm italic">
-                      No attachments yet
+                      Nenhum anexo adicionado ainda
                     </p>
                   )}
                 </CardContent>
@@ -324,7 +324,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                     </div>
                   ) : (
                     <p className="text-gray-500 text-sm italic">
-                      No history entries yet
+                      Nenhum registro de histórico ainda
                     </p>
                   )}
                 </CardContent>
@@ -335,8 +335,8 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
           {/* Additional Info */}
           <Card className="text-xs text-gray-500">
             <CardContent className="pt-6">
-              <p>Created: {bid.createdAt.toLocaleDateString("pt-BR")}</p>
-              <p>Last updated: {bid.updatedAt.toLocaleDateString("pt-BR")}</p>
+              <p>Criado em: {bid.createdAt.toLocaleDateString("pt-BR")}</p>
+              <p>Última atualização: {bid.updatedAt.toLocaleDateString("pt-BR")}</p>
             </CardContent>
           </Card>
         </div>
@@ -345,13 +345,12 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
-          <AlertDialogTitle>Delete Bid</AlertDialogTitle>
+          <AlertDialogTitle>Deletar Licitação</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete this bid? This action cannot be
-            undone.
+            Tem certeza de que deseja deletar esta licitação? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
           <div className="flex gap-3 justify-end">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onDelete(bid.id);
@@ -359,7 +358,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
               }}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              Deletar
             </AlertDialogAction>
           </div>
         </AlertDialogContent>

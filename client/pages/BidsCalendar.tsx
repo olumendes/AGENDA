@@ -117,8 +117,8 @@ export default function BidsCalendar() {
       <div className="w-80 border-r border-gray-200 bg-white flex flex-col">
         {/* Header */}
         <div className="border-b border-gray-200 p-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Licitations</h1>
-          <p className="text-sm text-gray-600">Public Bid Management</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Licitações</h1>
+          <p className="text-sm text-gray-600">Gestão de Licitações Públicas</p>
         </div>
 
         {/* Action Buttons */}
@@ -128,7 +128,7 @@ export default function BidsCalendar() {
             className="w-full bg-primary text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            New Bid
+            Nova Licitação
           </Button>
           <Button
             onClick={() => navigate("/settings")}
@@ -136,7 +136,7 @@ export default function BidsCalendar() {
             className="w-full"
           >
             <Settings className="h-4 w-4 mr-2" />
-            Settings
+            Configurações
           </Button>
         </div>
 
@@ -145,7 +145,7 @@ export default function BidsCalendar() {
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search bids..."
+              placeholder="Buscar licitações..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 text-sm"
@@ -165,14 +165,14 @@ export default function BidsCalendar() {
         <div className="p-4 border-b border-gray-200 space-y-3 overflow-y-auto flex-1">
           <div>
             <label className="text-xs font-semibold text-gray-700 block mb-1">
-              State
+              Estado (UF)
             </label>
             <Select value={filterState} onValueChange={setFilterState}>
               <SelectTrigger className="h-8 text-sm">
-                <SelectValue placeholder="All states" />
+                <SelectValue placeholder="Todos os estados" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All states</SelectItem>
+                <SelectItem value="all">Todos os estados</SelectItem>
                 {BRAZILIAN_STATES.map((state) => (
                   <SelectItem key={state} value={state}>
                     {state}
@@ -184,14 +184,14 @@ export default function BidsCalendar() {
 
           <div>
             <label className="text-xs font-semibold text-gray-700 block mb-1">
-              City
+              Município
             </label>
             <Select value={filterCity} onValueChange={setFilterCity}>
               <SelectTrigger className="h-8 text-sm">
-                <SelectValue placeholder="All cities" />
+                <SelectValue placeholder="Todos os municípios" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All cities</SelectItem>
+                <SelectItem value="all">Todos os municípios</SelectItem>
                 {uniqueCities.map((city) => (
                   <SelectItem key={city} value={city}>
                     {city}
@@ -203,14 +203,14 @@ export default function BidsCalendar() {
 
           <div>
             <label className="text-xs font-semibold text-gray-700 block mb-1">
-              Year
+              Ano
             </label>
             <Select value={filterYear} onValueChange={setFilterYear}>
               <SelectTrigger className="h-8 text-sm">
-                <SelectValue placeholder="All years" />
+                <SelectValue placeholder="Todos os anos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All years</SelectItem>
+                <SelectItem value="all">Todos os anos</SelectItem>
                 {uniqueYears.map((year) => (
                   <SelectItem key={year} value={year.toString()}>
                     {year}
@@ -223,7 +223,7 @@ export default function BidsCalendar() {
 
         {/* Results Summary */}
         <div className="p-4 bg-gray-50 border-t border-gray-200 text-sm text-gray-600">
-          {filteredBids.length} bid{filteredBids.length !== 1 ? "s" : ""} found
+          {filteredBids.length} licitação{filteredBids.length !== 1 ? "s" : ""} encontrada{filteredBids.length !== 1 ? "s" : ""}
         </div>
       </div>
 
@@ -234,7 +234,7 @@ export default function BidsCalendar() {
             <div className="border-b border-gray-200 p-4 bg-white sticky top-0 z-10">
               <div className="flex items-center justify-between max-w-6xl mx-auto">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Create New Bid
+                  Criar Nova Licitação
                 </h2>
                 <Button
                   variant="ghost"

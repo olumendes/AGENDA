@@ -40,7 +40,7 @@ export default function Settings() {
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Configurações</h1>
         </div>
       </div>
 
@@ -49,25 +49,25 @@ export default function Settings() {
         {/* Root Path Configuration */}
         <Card>
           <CardHeader>
-            <CardTitle>Local Storage Configuration</CardTitle>
+            <CardTitle>Configuração de Armazenamento Local</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-gray-600">
-              Configure the root directory where bid-related documents will be saved on your computer.
+              Configure o diretório raiz onde os documentos relacionados a licitações serão salvos em seu computador.
             </p>
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-2">
-                Root Path for Documents
+                Caminho Raiz para Documentos
               </label>
               <Input
                 type="text"
                 value={rootPath}
                 onChange={(e) => setRootPath(e.target.value)}
-                placeholder="e.g., Z:\1 -DIMAVE E\01 - EDITAIS E PROPOSTAS"
+                placeholder="ex: Z:\1 -DIMAVE E\01 - EDITAIS E PROPOSTAS"
                 className="font-mono text-sm"
               />
               <p className="text-xs text-gray-500 mt-2">
-                This path will be used as the base directory for organizing bid documents by state, city, and year.
+                Este caminho será usado como diretório base para organizar documentos de licitações por estado, município e ano.
               </p>
             </div>
           </CardContent>
@@ -76,7 +76,7 @@ export default function Settings() {
         {/* Auto-Save Configuration */}
         <Card>
           <CardHeader>
-            <CardTitle>Auto-Save Settings</CardTitle>
+            <CardTitle>Configurações de Auto-Salvar</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <label className="flex items-center gap-3 cursor-pointer">
@@ -87,11 +87,11 @@ export default function Settings() {
                 className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
               <span className="text-sm text-gray-700">
-                Enable auto-save for bid changes
+                Ativar auto-salvar para mudanças em licitações
               </span>
             </label>
             <p className="text-xs text-gray-500">
-              When enabled, changes to bids are automatically saved to local storage.
+              Quando ativado, as alterações em licitações são salvas automaticamente no armazenamento local.
             </p>
           </CardContent>
         </Card>
@@ -99,11 +99,11 @@ export default function Settings() {
         {/* Data Management */}
         <Card>
           <CardHeader>
-            <CardTitle>Data Management</CardTitle>
+            <CardTitle>Gerenciamento de Dados</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-gray-600">
-              All bid data is stored locally in your browser's storage. No data is sent to external servers.
+              Todos os dados de licitações são armazenados localmente no navegador. Nenhum dado é enviado para servidores externos.
             </p>
             <Button
               variant="outline"
@@ -112,11 +112,11 @@ export default function Settings() {
                 const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(bidsStr)}`;
                 const link = document.createElement("a");
                 link.setAttribute("href", dataStr);
-                link.setAttribute("download", `bids-backup-${Date.now()}.json`);
+                link.setAttribute("download", `licitacoes-backup-${Date.now()}.json`);
                 link.click();
               }}
             >
-              Export Bids as JSON
+              Exportar Licitações como JSON
             </Button>
           </CardContent>
         </Card>
@@ -127,7 +127,7 @@ export default function Settings() {
             {saved && (
               <div className="text-sm text-green-600 flex items-center gap-2">
                 <Save className="h-4 w-4" />
-                Settings saved successfully
+                Configurações salvas com sucesso
               </div>
             )}
           </div>
@@ -136,7 +136,7 @@ export default function Settings() {
             size="lg"
             className="bg-primary text-white"
           >
-            Save Settings
+            Salvar Configurações
           </Button>
         </div>
       </div>

@@ -63,7 +63,7 @@ export function MonthView({
     <div className="w-full h-full p-4">
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+        {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"].map((day) => (
           <div
             key={day}
             className="text-center text-sm font-semibold text-gray-500 py-2"

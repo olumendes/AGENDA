@@ -43,7 +43,7 @@ export function DayView({
           </h3>
           <Button onClick={onNewBid} size="sm">
             <Plus className="h-4 w-4 mr-2" />
-            New Bid
+            Nova Licitação
           </Button>
         </div>
       </div>
