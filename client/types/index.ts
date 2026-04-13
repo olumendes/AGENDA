@@ -1,4 +1,4 @@
-export type BidStatus = "cadastrado" | "codificado" | "questionamento" | "won" | "lost" | "nao_temos";
+export type BidStatus = "cadastrado" | "codificado" | "questionamento" | "analise" | "won" | "lost" | "nao_temos";
 export type BidType = "chamamento_publico" | "dispensa_eletronica" | "pregao_eletronico" | "pregao_presencial";
 
 export interface BidItem {

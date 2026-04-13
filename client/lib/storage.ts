@@ -15,7 +15,6 @@ export const bidStorage = {
         let status = bid.status;
         if (status === "participate") status = "codificado";
         if (status === "analyzing") status = "questionamento";
-        if (status === "cadastrado") status = "codificado";
 
         return {
           ...bid,

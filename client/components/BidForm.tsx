@@ -60,7 +60,7 @@ const BID_TYPE_LABELS: Record<BidType, string> = {
   pregao_presencial: "Pregão Presencial",
 };
 
-const STATUS_OPTIONS: BidStatus[] = ["codificado", "questionamento", "won", "lost", "nao_temos"];
+const STATUS_OPTIONS: BidStatus[] = ["cadastrado", "codificado", "questionamento", "analise", "won", "lost", "nao_temos"];
 
 export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
   const [formData, setFormData] = useState<Bid>(
@@ -219,6 +219,12 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${getBidColor("questionamento").bg}`} />
                     Questionamento
+                  </div>
+                </SelectItem>
+                <SelectItem value="analise">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("analise").bg}`} />
+                    Em Análise
                   </div>
                 </SelectItem>
                 <SelectItem value="won">
