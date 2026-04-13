@@ -64,6 +64,16 @@ export function getBidTypeLabel(bidType: BidType): string {
   return labels[bidType];
 }
 
+export function getBidTypeAbbreviation(bidType: BidType): string {
+  const abbreviations: Record<BidType, string> = {
+    chamamento_publico: "CH",
+    dispensa_eletronica: "DL",
+    pregao_eletronico: "PE",
+    pregao_presencial: "PR",
+  };
+  return abbreviations[bidType];
+}
+
 export function formatBidTitle(bidType: BidType, bidNumber: string, portal: string): string {
   return `${getBidTypeLabel(bidType)} Nº ${bidNumber} (${portal})`;
 }

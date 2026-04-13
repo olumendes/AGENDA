@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Bid } from "@/types";
 import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getBidColor, formatBidTitle } from "@/lib/bid-utils";
+import { getBidColor, formatBidTitle, getBidTypeAbbreviation } from "@/lib/bid-utils";
 import {
   Dialog,
   DialogContent,
@@ -125,7 +125,7 @@ export function MonthView({
                       )} />
                       <div className="flex-1 min-w-0">
                         <div className="font-semibold text-xs">{bid.disputeTime}</div>
-                        <div className="truncate text-xs text-gray-700">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal).substring(0, 20)}</div>
+                        <div className="truncate text-xs text-gray-700">{getBidTypeAbbreviation(bid.bidType)}</div>
                       </div>
                     </div>
                   ))}

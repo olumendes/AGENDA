@@ -1,5 +1,5 @@
 import { Bid } from "@/types";
-import { getBidColor, formatBidTitle } from "@/lib/bid-utils";
+import { getBidColor, formatBidTitle, getBidTypeAbbreviation } from "@/lib/bid-utils";
 
 interface WeekViewProps {
   date: Date;
@@ -116,7 +116,7 @@ export function WeekView({
                         <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getBidColor(bid.status).bg}`} />
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-xs">{bid.disputeTime}</div>
-                          <div className="truncate text-xs">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal).substring(0, 18)}</div>
+                          <div className="truncate text-xs">{getBidTypeAbbreviation(bid.bidType)}</div>
                         </div>
                       </div>
                     ))}
