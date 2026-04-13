@@ -1,5 +1,5 @@
 import { Bid } from "@/types";
-import { getBidColor, formatBidTitle } from "@/lib/bid-utils";
+import { getBidColor, formatBidTitle, getBidTypeAbbreviation } from "@/lib/bid-utils";
 
 interface WeekViewProps {
   date: Date;
@@ -106,26 +106,23 @@ export function WeekView({
                   className="flex-1 p-1 min-h-20 bg-white"
                 >
                   <div className="space-y-1">
-                    {dayBids.slice(0, 2).map((bid) => (
+                    {dayBids.slice(0, 3).map((bid) => (
                       <div
                         key={bid.id}
-                        className={`p-1 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity ${
-                          getBidColor(bid.status).bg
-                        } ${getBidColor(bid.status).text}`}
+                        className="text-xs flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity py-0.5"
                         onClick={() => onSelectBid(bid)}
                         title={formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}
                       >
-                        <div className="font-semibold truncate">
-                          {bid.disputeTime}
-                        </div>
-                        <div className="truncate text-xs">
-                          {formatBidTitle(bid.bidType, bid.bidNumber, bid.portal).substring(0, 15)}
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getBidColor(bid.status).bg}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-xs">{bid.disputeTime} {getBidTypeAbbreviation(bid.bidType)} {bid.bidNumber}</div>
+                          <div className="truncate text-xs text-gray-600">({bid.portal})</div>
                         </div>
                       </div>
                     ))}
-                    {dayBids.length > 2 && (
+                    {dayBids.length > 3 && (
                       <div className="text-xs text-gray-500 px-1">
-                        +{dayBids.length - 2}
+                        +{dayBids.length - 3}
                       </div>
                     )}
                   </div>

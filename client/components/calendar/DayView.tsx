@@ -1,6 +1,6 @@
 import { Bid } from "@/types";
 import { Plus } from "lucide-react";
-import { getBidColor, formatBidTitle } from "@/lib/bid-utils";
+import { getBidColor, formatBidTitle, getBidTypeAbbreviation } from "@/lib/bid-utils";
 import { Button } from "@/components/ui/button";
 
 interface DayViewProps {
@@ -66,13 +66,14 @@ export function DayView({
                 {daysForHour.map((bid) => (
                   <div
                     key={bid.id}
-                    className={`p-2 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity ${
-                      getBidColor(bid.status).bg
-                    } ${getBidColor(bid.status).text}`}
+                    className="text-xs flex items-start gap-2 cursor-pointer hover:opacity-80 transition-opacity py-1"
                     onClick={() => onSelectBid(bid)}
                   >
-                    <div className="font-semibold">{bid.disputeTime}</div>
-                    <div className="truncate">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}</div>
+                    <div className={`w-3 h-3 rounded-full flex-shrink-0 mt-0.5 ${getBidColor(bid.status).bg}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold">{bid.disputeTime} {getBidTypeAbbreviation(bid.bidType)} {bid.bidNumber}</div>
+                      <div className="truncate text-gray-600">({bid.portal})</div>
+                    </div>
                   </div>
                 ))}
               </div>

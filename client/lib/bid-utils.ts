@@ -5,6 +5,11 @@ export function getBidColor(status: BidStatus) {
     BidStatus,
     { bg: string; text: string; bgLight: string }
   > = {
+    cadastrado: {
+      bg: "bg-status-cadastrado",
+      text: "text-white",
+      bgLight: "bg-status-cadastrado-light text-status-cadastrado",
+    },
     codificado: {
       bg: "bg-status-codificado",
       text: "text-white",
@@ -37,6 +42,7 @@ export function getBidColor(status: BidStatus) {
 
 export function getStatusLabel(status: BidStatus): string {
   const labels: Record<BidStatus, string> = {
+    cadastrado: "Cadastrado",
     codificado: "Codificado",
     questionamento: "Questionamento",
     won: "Ganho",
@@ -62,6 +68,16 @@ export function getBidTypeLabel(bidType: BidType): string {
     pregao_presencial: "Pregão Presencial",
   };
   return labels[bidType];
+}
+
+export function getBidTypeAbbreviation(bidType: BidType): string {
+  const abbreviations: Record<BidType, string> = {
+    chamamento_publico: "CH",
+    dispensa_eletronica: "DL",
+    pregao_eletronico: "PE",
+    pregao_presencial: "PR",
+  };
+  return abbreviations[bidType];
 }
 
 export function formatBidTitle(bidType: BidType, bidNumber: string, portal: string): string {
