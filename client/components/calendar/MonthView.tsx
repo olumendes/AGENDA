@@ -119,7 +119,7 @@ export function MonthView({
                   ))}
                   {daysForDate.length > 2 && (
                     <div className="text-xs text-gray-500 px-1">
-                      +{daysForDate.length - 2} more
+                      +{daysForDate.length - 2} mais
                     </div>
                   )}
                 </div>
