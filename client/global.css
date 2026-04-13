@@ -59,6 +59,8 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* Bid Status Colors */
+    --status-cadastrado: 210 100% 26%;
+    --status-cadastrado-light: 210 100% 88%;
     --status-codificado: 270 100% 50%;
     --status-codificado-light: 270 100% 88%;
     --status-questionamento: 45 100% 51%;

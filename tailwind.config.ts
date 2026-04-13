@@ -58,11 +58,13 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
         status: {
+          cadastrado: "hsl(var(--status-cadastrado))",
           codificado: "hsl(var(--status-codificado))",
           questionamento: "hsl(var(--status-questionamento))",
           won: "hsl(var(--status-won))",
           lost: "hsl(var(--status-lost))",
           nao_temos: "hsl(var(--status-nao_temos))",
+          "cadastrado-light": "hsl(var(--status-cadastrado-light))",
           "codificado-light": "hsl(var(--status-codificado-light))",
           "questionamento-light": "hsl(var(--status-questionamento-light))",
           "won-light": "hsl(var(--status-won-light))",

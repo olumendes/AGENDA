@@ -215,6 +215,12 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="cadastrado">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("cadastrado").bg}`} />
+                    Cadastrado
+                  </div>
+                </SelectItem>
                 <SelectItem value="codificado">
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${getBidColor("codificado").bg}`} />
