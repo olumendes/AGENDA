@@ -89,7 +89,8 @@ export default function BidsCalendar() {
     return bids.filter((bid) => {
       const matchesSearch =
         searchQuery === "" ||
-        bid.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        `${bid.bidNumber}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        bid.bidType.toLowerCase().includes(searchQuery.toLowerCase()) ||
         bid.observation.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesState = filterState === "all" || filterState === "" || bid.state === filterState;

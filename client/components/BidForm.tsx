@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bid, BidStatus, BidAttachment } from "@/types";
+import { Bid, BidStatus, BidAttachment, BidType } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,9 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2 } from "lucide-react";
 import { getBidColor } from "@/lib/bid-utils";
 import { FileUpload } from "./FileUpload";
+import { ItemsManager } from "./ItemsManager";
 
 interface BidFormProps {
   bid?: Bid;
@@ -51,13 +51,24 @@ const BRAZILIAN_STATES = [
   "TO",
 ];
 
-const STATUS_OPTIONS: BidStatus[] = ["codificado", "questionamento", "won", "lost"];
+const BID_TYPE_OPTIONS: BidType[] = ["chamamento_publico", "dispensa_eletronica", "pregao_eletronico", "pregao_presencial"];
+
+const BID_TYPE_LABELS: Record<BidType, string> = {
+  chamamento_publico: "Chamamento Público",
+  dispensa_eletronica: "Dispensa Eletrônica",
+  pregao_eletronico: "Pregão Eletrônico",
+  pregao_presencial: "Pregão Presencial",
+};
+
+const STATUS_OPTIONS: BidStatus[] = ["codificado", "questionamento", "won", "lost", "nao_temos"];
 
 export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
   const [formData, setFormData] = useState<Bid>(
     bid || {
       id: Date.now().toString(),
       title: "",
+      bidType: "pregao_eletronico",
+      bidNumber: "",
       observation: "",
       disputeDate: new Date(),
       disputeTime: "09:00",
@@ -79,7 +90,6 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
     }
   );
 
-  const [newItem, setNewItem] = useState("");
 
   const handleChange = (
     field: keyof Bid,
@@ -92,33 +102,6 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
     }));
   };
 
-  const handleAddItem = (category: "itemsRegistered" | "itemsWon" | "itemsLost") => {
-    if (newItem.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        items: {
-          ...prev.items,
-          [category]: [...prev.items[category], newItem],
-        },
-        updatedAt: new Date(),
-      }));
-      setNewItem("");
-    }
-  };
-
-  const handleRemoveItem = (
-    category: "itemsRegistered" | "itemsWon" | "itemsLost",
-    index: number
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      items: {
-        ...prev.items,
-        [category]: prev.items[category].filter((_, i) => i !== index),
-      },
-      updatedAt: new Date(),
-    }));
-  };
 
   const handleSubmit = () => {
     onSave(formData);
@@ -132,16 +115,45 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
           <CardTitle>Informações da Licitação</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Título (TIPO + NÚMERO - PRODUTOS (PORTAL))
-            </label>
-            <Input
-              value={formData.title}
-              onChange={(e) => handleChange("title", e.target.value)}
-              placeholder="ex: PREGÃO Nº 123 - PRODUTOS (ComprasNet)"
-              className="mt-1"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700">Tipo</label>
+              <Select
+                value={formData.bidType}
+                onValueChange={(value) =>
+                  handleChange("bidType", value as BidType)
+                }
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {BID_TYPE_OPTIONS.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {BID_TYPE_LABELS[type]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700">Número</label>
+              <Input
+                value={formData.bidNumber}
+                onChange={(e) => handleChange("bidNumber", e.target.value)}
+                placeholder="ex: 123"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700">Portal</label>
+              <Input
+                value={formData.portal}
+                onChange={(e) => handleChange("portal", e.target.value)}
+                placeholder="ex: ComprasNet, BLL, Licitanet"
+                className="mt-1"
+              />
+            </div>
           </div>
 
           <div>
@@ -181,16 +193,6 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                 className="mt-1"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">Portal</label>
-            <Input
-              value={formData.portal}
-              onChange={(e) => handleChange("portal", e.target.value)}
-              placeholder="ex: ComprasNet, BLL, Licitanet"
-              className="mt-1"
-            />
           </div>
         </CardContent>
       </Card>
@@ -235,6 +237,12 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${getBidColor("lost").bg}`} />
                     Perdido
+                  </div>
+                </SelectItem>
+                <SelectItem value="nao_temos">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("nao_temos").bg}`} />
+                    Não temos
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -297,129 +305,12 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       </Card>
 
       {/* Items Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestão de Itens</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Registered Items */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-2">
-              Itens Cadastrados
-            </label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                placeholder="Descrição do item"
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddItem("itemsRegistered");
-                  }
-                }}
-              />
-              <Button
-                size="sm"
-                onClick={() => handleAddItem("itemsRegistered")}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-1">
-              {formData.items.itemsRegistered.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between bg-gray-50 p-2 rounded"
-                >
-                  <span className="text-sm">{item}</span>
-                  <button
-                    onClick={() => handleRemoveItem("itemsRegistered", idx)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Won Items */}
-          <div>
-            <label className="text-sm font-medium text-status-won block mb-2">
-              O Que Ganhamos
-            </label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                placeholder="Item ganho"
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddItem("itemsWon");
-                  }
-                }}
-              />
-              <Button size="sm" onClick={() => handleAddItem("itemsWon")}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-1">
-              {formData.items.itemsWon.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between bg-status-won-light p-2 rounded"
-                >
-                  <span className="text-sm">{item}</span>
-                  <button
-                    onClick={() => handleRemoveItem("itemsWon", idx)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Lost Items */}
-          <div>
-            <label className="text-sm font-medium text-status-lost block mb-2">
-              O Que Perdemos
-            </label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                placeholder="Item perdido"
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddItem("itemsLost");
-                  }
-                }}
-              />
-              <Button size="sm" onClick={() => handleAddItem("itemsLost")}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-1">
-              {formData.items.itemsLost.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between bg-status-lost-light p-2 rounded"
-                >
-                  <span className="text-sm">{item}</span>
-                  <button
-                    onClick={() => handleRemoveItem("itemsLost", idx)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ItemsManager
+        items={formData.items}
+        onItemsChange={(newItems) =>
+          handleChange("items", newItems)
+        }
+      />
 
       {/* File Attachments */}
       <Card>

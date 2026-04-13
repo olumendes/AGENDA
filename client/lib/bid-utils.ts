@@ -1,4 +1,4 @@
-import { BidStatus } from "@/types";
+import { BidStatus, BidType } from "@/types";
 
 export function getBidColor(status: BidStatus) {
   const colors: Record<
@@ -52,4 +52,18 @@ export function formatDate(date: Date): string {
 
 export function formatDateTime(date: Date, time: string): string {
   return `${formatDate(date)} às ${time}`;
+}
+
+export function getBidTypeLabel(bidType: BidType): string {
+  const labels: Record<BidType, string> = {
+    chamamento_publico: "Chamamento Público",
+    dispensa_eletronica: "Dispensa Eletrônica",
+    pregao_eletronico: "Pregão Eletrônico",
+    pregao_presencial: "Pregão Presencial",
+  };
+  return labels[bidType];
+}
+
+export function formatBidTitle(bidType: BidType, bidNumber: string, portal: string): string {
+  return `${getBidTypeLabel(bidType)} Nº ${bidNumber} (${portal})`;
 }

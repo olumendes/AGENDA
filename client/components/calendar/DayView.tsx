@@ -1,6 +1,6 @@
 import { Bid } from "@/types";
 import { Plus } from "lucide-react";
-import { getBidColor } from "@/lib/bid-utils";
+import { getBidColor, formatBidTitle } from "@/lib/bid-utils";
 import { Button } from "@/components/ui/button";
 
 interface DayViewProps {
@@ -72,7 +72,7 @@ export function DayView({
                     onClick={() => onSelectBid(bid)}
                   >
                     <div className="font-semibold">{bid.disputeTime}</div>
-                    <div className="truncate">{bid.title}</div>
+                    <div className="truncate">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}</div>
                   </div>
                 ))}
               </div>
