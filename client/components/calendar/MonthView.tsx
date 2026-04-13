@@ -104,7 +104,7 @@ export function MonthView({
                     <div
                       key={bid.id}
                       className={cn(
-                        "text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 transition-opacity",
+                        "text-xs p-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity",
                         getBidColor(bid.status).bg,
                         getBidColor(bid.status).text
                       )}
@@ -114,7 +114,9 @@ export function MonthView({
                       }}
                       title={formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}
                     >
-                      {formatBidTitle(bid.bidType, bid.bidNumber, bid.portal).substring(0, 20)}
+                      <div className="font-semibold">{bid.disputeTime}</div>
+                      <div className="opacity-90">{bid.state} {bid.disputeDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "numeric", year: "2-digit" })}</div>
+                      <div className="truncate text-xs">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal).substring(0, 25)}</div>
                     </div>
                   ))}
                   {daysForDate.length > 2 && (

@@ -109,18 +109,15 @@ export function WeekView({
                     {dayBids.slice(0, 2).map((bid) => (
                       <div
                         key={bid.id}
-                        className={`p-1 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity ${
+                        className={`p-1.5 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity ${
                           getBidColor(bid.status).bg
                         } ${getBidColor(bid.status).text}`}
                         onClick={() => onSelectBid(bid)}
                         title={formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}
                       >
-                        <div className="font-semibold truncate">
-                          {bid.disputeTime}
-                        </div>
-                        <div className="truncate text-xs">
-                          {formatBidTitle(bid.bidType, bid.bidNumber, bid.portal).substring(0, 15)}
-                        </div>
+                        <div className="font-semibold">{bid.disputeTime}</div>
+                        <div className="opacity-90 text-xs">{bid.state} {bid.disputeDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "numeric", year: "2-digit" })}</div>
+                        <div className="truncate text-xs">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal).substring(0, 20)}</div>
                       </div>
                     ))}
                     {dayBids.length > 2 && (

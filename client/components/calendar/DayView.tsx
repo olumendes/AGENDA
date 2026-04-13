@@ -66,12 +66,13 @@ export function DayView({
                 {daysForHour.map((bid) => (
                   <div
                     key={bid.id}
-                    className={`p-2 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity ${
+                    className={`p-2.5 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity ${
                       getBidColor(bid.status).bg
                     } ${getBidColor(bid.status).text}`}
                     onClick={() => onSelectBid(bid)}
                   >
                     <div className="font-semibold">{bid.disputeTime}</div>
+                    <div className="opacity-90 text-xs">{bid.state} {bid.disputeDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "numeric", year: "2-digit" })}</div>
                     <div className="truncate">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}</div>
                   </div>
                 ))}
