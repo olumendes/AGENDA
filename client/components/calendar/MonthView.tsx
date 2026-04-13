@@ -100,28 +100,29 @@ export function MonthView({
                   {date ? date.getDate() : ""}
                 </div>
                 <div className="space-y-1">
-                  {daysForDate.slice(0, 2).map((bid) => (
+                  {daysForDate.slice(0, 3).map((bid) => (
                     <div
                       key={bid.id}
-                      className={cn(
-                        "text-xs p-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity",
-                        getBidColor(bid.status).bg,
-                        getBidColor(bid.status).text
-                      )}
+                      className="text-xs flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity py-0.5"
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelectBid(bid);
                       }}
                       title={formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}
                     >
-                      <div className="font-semibold">{bid.disputeTime}</div>
-                      <div className="opacity-90">{bid.state} {bid.disputeDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "numeric", year: "2-digit" })}</div>
-                      <div className="truncate text-xs">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal).substring(0, 25)}</div>
+                      <div className={cn(
+                        "w-2 h-2 rounded-full flex-shrink-0",
+                        getBidColor(bid.status).bg
+                      )} />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-xs">{bid.disputeTime}</div>
+                        <div className="truncate text-xs text-gray-700">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal).substring(0, 20)}</div>
+                      </div>
                     </div>
                   ))}
-                  {daysForDate.length > 2 && (
+                  {daysForDate.length > 3 && (
                     <div className="text-xs text-gray-500 px-1">
-                      +{daysForDate.length - 2} mais
+                      +{daysForDate.length - 3} mais
                     </div>
                   )}
                 </div>
