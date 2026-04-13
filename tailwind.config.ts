@@ -57,6 +57,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        status: {
+          participate: "hsl(var(--status-participate))",
+          analyzing: "hsl(var(--status-analyzing))",
+          won: "hsl(var(--status-won))",
+          lost: "hsl(var(--status-lost))",
+          "participate-light": "hsl(var(--status-participate-light))",
+          "analyzing-light": "hsl(var(--status-analyzing-light))",
+          "won-light": "hsl(var(--status-won-light))",
+          "lost-light": "hsl(var(--status-lost-light))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

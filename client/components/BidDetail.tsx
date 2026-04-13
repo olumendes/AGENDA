@@ -1,0 +1,369 @@
+import { useState } from "react";
+import { Bid, BidAttachment } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Edit2, Trash2, Download, X } from "lucide-react";
+import { getBidColor, getStatusLabel, formatDateTime } from "@/lib/bid-utils";
+import { BidForm } from "./BidForm";
+
+interface BidDetailProps {
+  bid: Bid;
+  onEdit: (bid: Bid) => void;
+  onDelete: (id: string) => void;
+  onClose: () => void;
+}
+
+export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  if (isEditing) {
+    return (
+      <div className="max-h-screen overflow-y-auto p-6 bg-white">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsEditing(false)}
+          className="mb-4"
+        >
+          Back to Details
+        </Button>
+        <BidForm
+          bid={bid}
+          onSave={(updatedBid) => {
+            onEdit(updatedBid);
+            setIsEditing(false);
+          }}
+          onCancel={() => setIsEditing(false)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="max-h-screen overflow-y-auto">
+        {/* Header */}
+        <div
+          className={`${getBidColor(bid.status).bg} ${
+            getBidColor(bid.status).text
+          } p-6 border-b`}
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold mb-2">{bid.title}</h1>
+              <p className="opacity-90 text-sm">{bid.observation}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={onClose}
+                className="text-white hover:bg-black/20"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Key Information */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-500">
+                  Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      getBidColor(bid.status).bg
+                    }`}
+                  />
+                  <span className="font-semibold">
+                    {getStatusLabel(bid.status)}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-500">
+                  Dispute Date & Time
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="font-semibold">
+                  {formatDateTime(bid.disputeDate, bid.disputeTime)}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-500">
+                  Portal
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="font-semibold">{bid.portal}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Location Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Location & Year</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Year</p>
+                  <p className="font-semibold">{bid.year}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">State</p>
+                  <p className="font-semibold">{bid.state}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">City</p>
+                  <p className="font-semibold">{bid.city}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tabs for detailed content */}
+          <Tabs defaultValue="notes">
+            <TabsList>
+              <TabsTrigger value="notes">Process Journal</TabsTrigger>
+              <TabsTrigger value="items">Items</TabsTrigger>
+              <TabsTrigger value="attachments">Attachments</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+            </TabsList>
+
+            {/* Process Journal */}
+            <TabsContent value="notes">
+              <Card>
+                <CardContent className="pt-6">
+                  {bid.notes ? (
+                    <p className="whitespace-pre-wrap text-sm">{bid.notes}</p>
+                  ) : (
+                    <p className="text-gray-500 text-sm italic">
+                      No notes added yet
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Items */}
+            <TabsContent value="items">
+              <div className="space-y-4">
+                {bid.items.itemsRegistered.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">
+                        Registered Items
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-1">
+                        {bid.items.itemsRegistered.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="text-sm p-2 bg-gray-50 rounded"
+                          >
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {bid.items.itemsWon.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base text-status-won">
+                        Items Won
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-1">
+                        {bid.items.itemsWon.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="text-sm p-2 bg-status-won-light rounded"
+                          >
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {bid.items.itemsLost.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base text-status-lost">
+                        Items Lost
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-1">
+                        {bid.items.itemsLost.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="text-sm p-2 bg-status-lost-light rounded"
+                          >
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {!bid.items.itemsRegistered.length &&
+                  !bid.items.itemsWon.length &&
+                  !bid.items.itemsLost.length && (
+                    <Card>
+                      <CardContent className="pt-6">
+                        <p className="text-gray-500 text-sm italic">
+                          No items added yet
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+              </div>
+            </TabsContent>
+
+            {/* Attachments */}
+            <TabsContent value="attachments">
+              <Card>
+                <CardContent className="pt-6">
+                  {bid.attachments.length > 0 ? (
+                    <div className="space-y-2">
+                      {bid.attachments.map((attachment) => (
+                        <div
+                          key={attachment.id}
+                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                        >
+                          <div>
+                            <p className="font-medium text-sm">
+                              {attachment.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {attachment.type} - Uploaded{" "}
+                              {attachment.uploadedAt.toLocaleDateString()}
+                            </p>
+                          </div>
+                          <Button size="sm" variant="outline">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm italic">
+                      No attachments yet
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* History */}
+            <TabsContent value="history">
+              <Card>
+                <CardContent className="pt-6">
+                  {bid.processHistory.length > 0 ? (
+                    <div className="space-y-3">
+                      {bid.processHistory.map((entry, idx) => (
+                        <div key={idx} className="border-l-2 border-primary pl-4 py-2">
+                          <p className="font-medium text-sm">{entry.title}</p>
+                          <p className="text-xs text-gray-500 mb-1">
+                            {entry.date.toLocaleDateString("pt-BR")}
+                          </p>
+                          <p className="text-sm">{entry.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm italic">
+                      No history entries yet
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          {/* Additional Info */}
+          <Card className="text-xs text-gray-500">
+            <CardContent className="pt-6">
+              <p>Created: {bid.createdAt.toLocaleDateString("pt-BR")}</p>
+              <p>Last updated: {bid.updatedAt.toLocaleDateString("pt-BR")}</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogTitle>Delete Bid</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this bid? This action cannot be
+            undone.
+          </AlertDialogDescription>
+          <div className="flex gap-3 justify-end">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                onDelete(bid.id);
+                onClose();
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
