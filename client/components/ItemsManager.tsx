@@ -26,12 +26,12 @@ export function ItemsManager({ items, onItemsChange }: ItemsManagerProps) {
   const [draggedItem, setDraggedItem] = useState<{ category: string; id: string } | null>(null);
 
   const handleAddItem = () => {
-    if (newNumber.trim() && newCode.trim() && newDescription.trim()) {
+    if (newNumber.trim() && newCode.trim()) {
       const newItem: BidItem = {
         id: Date.now().toString(),
         number: newNumber,
         code: newCode,
-        description: newDescription,
+        description: newDescription || `${newNumber} - ${newCode}`,
       };
 
       onItemsChange({
@@ -122,9 +122,9 @@ export function ItemsManager({ items, onItemsChange }: ItemsManagerProps) {
       <CardContent className="space-y-6">
         {/* Add New Item */}
         <div className="space-y-2 p-4 bg-gray-50 rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <Input
-              placeholder="Número do item"
+              placeholder="Número do item *"
               value={newNumber}
               onChange={(e) => setNewNumber(e.target.value)}
               onKeyPress={(e) => {
@@ -132,27 +132,19 @@ export function ItemsManager({ items, onItemsChange }: ItemsManagerProps) {
               }}
             />
             <Input
-              placeholder="Código"
+              placeholder="Código *"
               value={newCode}
               onChange={(e) => setNewCode(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === "Enter") handleAddItem();
               }}
             />
-            <Input
-              placeholder="Descrição do item"
-              value={newDescription}
-              onChange={(e) => setNewDescription(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") handleAddItem();
-              }}
-              className="md:col-span-1"
-            />
             <Button onClick={handleAddItem} size="sm" className="w-full">
               <Plus className="h-4 w-4 mr-1" />
               Adicionar
             </Button>
           </div>
+          <p className="text-xs text-gray-500">* Campos obrigatórios. A descrição é opcional.</p>
         </div>
 
         {/* Registered Items */}
