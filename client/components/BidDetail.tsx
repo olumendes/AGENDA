@@ -203,13 +203,9 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                         {bid.items.itemsRegistered.map((item) => (
                           <li
                             key={item.id}
-                            className="text-sm p-2 bg-gray-50 rounded"
+                            className="text-sm p-2 bg-gray-50 rounded text-gray-700"
                           >
-                            <div className="flex gap-2 font-medium">
-                              <span className="font-bold">#{item.number}</span>
-                              <span className="text-gray-600">[{item.code}]</span>
-                            </div>
-                            <p className="text-gray-700">{item.description}</p>
+                            {item.description}
                           </li>
                         ))}
                       </ul>
@@ -229,13 +225,9 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                         {bid.items.itemsWon.map((item) => (
                           <li
                             key={item.id}
-                            className="text-sm p-2 bg-status-won-light rounded"
+                            className="text-sm p-2 bg-status-won-light rounded text-gray-700"
                           >
-                            <div className="flex gap-2 font-medium">
-                              <span className="font-bold">#{item.number}</span>
-                              <span className="text-gray-600">[{item.code}]</span>
-                            </div>
-                            <p className="text-gray-700">{item.description}</p>
+                            {item.description}
                           </li>
                         ))}
                       </ul>
@@ -255,13 +247,9 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                         {bid.items.itemsLost.map((item) => (
                           <li
                             key={item.id}
-                            className="text-sm p-2 bg-status-lost-light rounded"
+                            className="text-sm p-2 bg-status-lost-light rounded text-gray-700"
                           >
-                            <div className="flex gap-2 font-medium">
-                              <span className="font-bold">#{item.number}</span>
-                              <span className="text-gray-600">[{item.code}]</span>
-                            </div>
-                            <p className="text-gray-700">{item.description}</p>
+                            {item.description}
                           </li>
                         ))}
                       </ul>
