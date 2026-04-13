@@ -93,21 +93,21 @@ export function Calendar({ bids, onSelectBid, onNewBid }: CalendarProps) {
               size="sm"
               onClick={() => setViewMode("day")}
             >
-              Day
+              Dia
             </Button>
             <Button
               variant={viewMode === "week" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("week")}
             >
-              Week
+              Semana
             </Button>
             <Button
               variant={viewMode === "month" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("month")}
             >
-              Month
+              Mês
             </Button>
           </div>
         </div>

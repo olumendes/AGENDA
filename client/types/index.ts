@@ -1,4 +1,4 @@
-export type BidStatus = "participate" | "analyzing" | "won" | "lost";
+export type BidStatus = "codificado" | "questionamento" | "won" | "lost" | "nao_temos";
 
 export interface Bid {
   id: string;

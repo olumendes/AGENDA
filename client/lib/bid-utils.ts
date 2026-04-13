@@ -5,15 +5,15 @@ export function getBidColor(status: BidStatus) {
     BidStatus,
     { bg: string; text: string; bgLight: string }
   > = {
-    participate: {
-      bg: "bg-status-participate",
+    codificado: {
+      bg: "bg-status-codificado",
       text: "text-white",
-      bgLight: "bg-status-participate-light text-status-participate",
+      bgLight: "bg-status-codificado-light text-status-codificado",
     },
-    analyzing: {
-      bg: "bg-status-analyzing",
+    questionamento: {
+      bg: "bg-status-questionamento",
       text: "text-white",
-      bgLight: "bg-status-analyzing-light text-status-analyzing",
+      bgLight: "bg-status-questionamento-light text-status-questionamento",
     },
     won: {
       bg: "bg-status-won",
@@ -25,6 +25,11 @@ export function getBidColor(status: BidStatus) {
       text: "text-white",
       bgLight: "bg-status-lost-light text-status-lost",
     },
+    nao_temos: {
+      bg: "bg-status-nao_temos",
+      text: "text-white",
+      bgLight: "bg-status-nao_temos-light text-status-nao_temos",
+    },
   };
 
   return colors[status];
@@ -32,10 +37,11 @@ export function getBidColor(status: BidStatus) {
 
 export function getStatusLabel(status: BidStatus): string {
   const labels: Record<BidStatus, string> = {
-    participate: "Participar",
-    analyzing: "Analisando",
+    codificado: "Codificado",
+    questionamento: "Questionamento",
     won: "Ganho",
     lost: "Perdido",
+    nao_temos: "Não temos",
   };
   return labels[status];
 }

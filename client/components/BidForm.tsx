@@ -51,7 +51,7 @@ const BRAZILIAN_STATES = [
   "TO",
 ];
 
-const STATUS_OPTIONS: BidStatus[] = ["participate", "analyzing", "won", "lost"];
+const STATUS_OPTIONS: BidStatus[] = ["codificado", "questionamento", "won", "lost"];
 
 export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
   const [formData, setFormData] = useState<Bid>(
@@ -62,7 +62,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       disputeDate: new Date(),
       disputeTime: "09:00",
       portal: "",
-      status: "participate",
+      status: "codificado",
       year: new Date().getFullYear(),
       state: "",
       city: "",
@@ -213,16 +213,16 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="participate">
+                <SelectItem value="codificado">
                   <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${getBidColor("participate").bg}`} />
-                    Participar
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("codificado").bg}`} />
+                    Codificado
                   </div>
                 </SelectItem>
-                <SelectItem value="analyzing">
+                <SelectItem value="questionamento">
                   <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${getBidColor("analyzing").bg}`} />
-                    Analisando
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("questionamento").bg}`} />
+                    Questionamento
                   </div>
                 </SelectItem>
                 <SelectItem value="won">

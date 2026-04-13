@@ -63,7 +63,7 @@ export default function Settings() {
                 type="text"
                 value={rootPath}
                 onChange={(e) => setRootPath(e.target.value)}
-                placeholder="ex: Z:\1 -DIMAVE E\01 - EDITAIS E PROPOSTAS"
+                placeholder="ex: Z:\\1 -DIMAVE E\\01 - EDITAIS E PROPOSTAS"
                 className="font-mono text-sm"
               />
               <p className="text-xs text-gray-500 mt-2">
