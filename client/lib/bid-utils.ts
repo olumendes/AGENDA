@@ -25,6 +25,11 @@ export function getBidColor(status: BidStatus) {
       text: "text-white",
       bgLight: "bg-status-lost-light text-status-lost",
     },
+    nao_temos: {
+      bg: "bg-status-nao_temos",
+      text: "text-white",
+      bgLight: "bg-status-nao_temos-light text-status-nao_temos",
+    },
   };
 
   return colors[status];
@@ -36,6 +41,7 @@ export function getStatusLabel(status: BidStatus): string {
     questionamento: "Questionamento",
     won: "Ganho",
     lost: "Perdido",
+    nao_temos: "Não temos",
   };
   return labels[status];
 }

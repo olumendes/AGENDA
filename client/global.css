@@ -67,6 +67,8 @@
     --status-won-light: 142 71% 85%;
     --status-lost: 0 84.2% 60.2%;
     --status-lost-light: 0 84.2% 90%;
+    --status-nao_temos: 220 13% 51%;
+    --status-nao_temos-light: 220 13% 88%;
   }
 
   .dark {

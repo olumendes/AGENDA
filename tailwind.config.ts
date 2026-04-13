@@ -62,10 +62,12 @@ export default {
           questionamento: "hsl(var(--status-questionamento))",
           won: "hsl(var(--status-won))",
           lost: "hsl(var(--status-lost))",
+          nao_temos: "hsl(var(--status-nao_temos))",
           "codificado-light": "hsl(var(--status-codificado-light))",
           "questionamento-light": "hsl(var(--status-questionamento-light))",
           "won-light": "hsl(var(--status-won-light))",
           "lost-light": "hsl(var(--status-lost-light))",
+          "nao_temos-light": "hsl(var(--status-nao_temos-light))",
         },
       },
       borderRadius: {
