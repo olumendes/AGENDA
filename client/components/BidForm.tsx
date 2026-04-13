@@ -51,7 +51,7 @@ const BRAZILIAN_STATES = [
   "TO",
 ];
 
-const STATUS_OPTIONS: BidStatus[] = ["codificado", "questionamento", "won", "lost"];
+const STATUS_OPTIONS: BidStatus[] = ["codificado", "questionamento", "won", "lost", "nao_temos"];
 
 export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
   const [formData, setFormData] = useState<Bid>(
@@ -235,6 +235,12 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${getBidColor("lost").bg}`} />
                     Perdido
+                  </div>
+                </SelectItem>
+                <SelectItem value="nao_temos">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("nao_temos").bg}`} />
+                    Não temos
                   </div>
                 </SelectItem>
               </SelectContent>
