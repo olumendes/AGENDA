@@ -9,21 +9,29 @@ export const bidStorage = {
       const data = localStorage.getItem(BIDS_KEY);
       if (!data) return [];
       const bids = JSON.parse(data);
-      // Convert date strings back to Date objects
-      return bids.map((bid: any) => ({
-        ...bid,
-        disputeDate: new Date(bid.disputeDate),
-        createdAt: new Date(bid.createdAt),
-        updatedAt: new Date(bid.updatedAt),
-        attachments: bid.attachments.map((att: any) => ({
-          ...att,
-          uploadedAt: new Date(att.uploadedAt),
-        })),
-        processHistory: bid.processHistory.map((entry: any) => ({
-          ...entry,
-          date: new Date(entry.date),
-        })),
-      }));
+      // Convert date strings back to Date objects and migrate old status values
+      return bids.map((bid: any) => {
+        // Migrate old status values to new ones
+        let status = bid.status;
+        if (status === "participate") status = "cadastrado";
+        if (status === "analyzing") status = "questionamento";
+
+        return {
+          ...bid,
+          status,
+          disputeDate: new Date(bid.disputeDate),
+          createdAt: new Date(bid.createdAt),
+          updatedAt: new Date(bid.updatedAt),
+          attachments: bid.attachments.map((att: any) => ({
+            ...att,
+            uploadedAt: new Date(att.uploadedAt),
+          })),
+          processHistory: bid.processHistory.map((entry: any) => ({
+            ...entry,
+            date: new Date(entry.date),
+          })),
+        };
+      });
     } catch {
       return [];
     }
