@@ -156,18 +156,6 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
             </div>
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Observação (Órgão + Número do Processo)
-            </label>
-            <Input
-              value={formData.observation}
-              onChange={(e) => handleChange("observation", e.target.value)}
-              placeholder="ex: Ministério da Saúde - Processo 001.2024"
-              className="mt-1"
-            />
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700">
