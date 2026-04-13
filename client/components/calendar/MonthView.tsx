@@ -1,7 +1,14 @@
+import { useState } from "react";
 import { Bid } from "@/types";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getBidColor, formatBidTitle } from "@/lib/bid-utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface MonthViewProps {
   date: Date;
@@ -16,6 +23,8 @@ export function MonthView({
   onSelectBid,
   onNewBid,
 }: MonthViewProps) {
+  const [expandedDate, setExpandedDate] = useState<Date | null>(null);
+
   const year = date.getFullYear();
   const month = date.getMonth();
 
@@ -121,9 +130,15 @@ export function MonthView({
                     </div>
                   ))}
                   {daysForDate.length > 3 && (
-                    <div className="text-xs text-gray-500 px-1">
+                    <button
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium px-1 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedDate(date);
+                      }}
+                    >
                       +{daysForDate.length - 3} mais
-                    </div>
+                    </button>
                   )}
                 </div>
               </div>
@@ -131,6 +146,44 @@ export function MonthView({
           })
         )}
       </div>
+
+      {/* Expanded day modal */}
+      <Dialog open={expandedDate !== null} onOpenChange={() => setExpandedDate(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>
+              {expandedDate?.toLocaleDateString("pt-BR", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {expandedDate && getBidsForDate(expandedDate).map((bid) => (
+              <div
+                key={bid.id}
+                className="text-sm flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+                onClick={() => {
+                  onSelectBid(bid);
+                  setExpandedDate(null);
+                }}
+              >
+                <div className={cn(
+                  "w-3 h-3 rounded-full flex-shrink-0 mt-1.5",
+                  getBidColor(bid.status).bg
+                )} />
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold">{bid.disputeTime}</div>
+                  <div className="text-gray-600 text-xs">{bid.state} - {bid.city}</div>
+                  <div className="text-gray-700 mt-1">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
