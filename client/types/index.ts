@@ -1,5 +1,12 @@
 export type BidStatus = "codificado" | "questionamento" | "won" | "lost" | "nao_temos";
 
+export interface BidItem {
+  id: string;
+  number: string;
+  code: string;
+  description: string;
+}
+
 export interface Bid {
   id: string;
   title: string; // TIPO + NÚMERO - PRODUTOS (PORTAL)
@@ -13,9 +20,9 @@ export interface Bid {
   city: string;
   notes: string; // Detailed journal/notes
   items: {
-    itemsRegistered: string[];
-    itemsWon: string[];
-    itemsLost: string[];
+    itemsRegistered: BidItem[];
+    itemsWon: BidItem[];
+    itemsLost: BidItem[];
   };
   attachments: BidAttachment[];
   processHistory: ProcessHistoryEntry[];

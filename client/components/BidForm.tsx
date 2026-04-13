@@ -11,9 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2 } from "lucide-react";
 import { getBidColor } from "@/lib/bid-utils";
 import { FileUpload } from "./FileUpload";
+import { ItemsManager } from "./ItemsManager";
 
 interface BidFormProps {
   bid?: Bid;
@@ -79,7 +79,6 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
     }
   );
 
-  const [newItem, setNewItem] = useState("");
 
   const handleChange = (
     field: keyof Bid,
@@ -92,33 +91,6 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
     }));
   };
 
-  const handleAddItem = (category: "itemsRegistered" | "itemsWon" | "itemsLost") => {
-    if (newItem.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        items: {
-          ...prev.items,
-          [category]: [...prev.items[category], newItem],
-        },
-        updatedAt: new Date(),
-      }));
-      setNewItem("");
-    }
-  };
-
-  const handleRemoveItem = (
-    category: "itemsRegistered" | "itemsWon" | "itemsLost",
-    index: number
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      items: {
-        ...prev.items,
-        [category]: prev.items[category].filter((_, i) => i !== index),
-      },
-      updatedAt: new Date(),
-    }));
-  };
 
   const handleSubmit = () => {
     onSave(formData);
@@ -303,129 +275,12 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       </Card>
 
       {/* Items Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestão de Itens</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Registered Items */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-2">
-              Itens Cadastrados
-            </label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                placeholder="Descrição do item"
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddItem("itemsRegistered");
-                  }
-                }}
-              />
-              <Button
-                size="sm"
-                onClick={() => handleAddItem("itemsRegistered")}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-1">
-              {formData.items.itemsRegistered.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between bg-gray-50 p-2 rounded"
-                >
-                  <span className="text-sm">{item}</span>
-                  <button
-                    onClick={() => handleRemoveItem("itemsRegistered", idx)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Won Items */}
-          <div>
-            <label className="text-sm font-medium text-status-won block mb-2">
-              O Que Ganhamos
-            </label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                placeholder="Item ganho"
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddItem("itemsWon");
-                  }
-                }}
-              />
-              <Button size="sm" onClick={() => handleAddItem("itemsWon")}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-1">
-              {formData.items.itemsWon.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between bg-status-won-light p-2 rounded"
-                >
-                  <span className="text-sm">{item}</span>
-                  <button
-                    onClick={() => handleRemoveItem("itemsWon", idx)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Lost Items */}
-          <div>
-            <label className="text-sm font-medium text-status-lost block mb-2">
-              O Que Perdemos
-            </label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                placeholder="Item perdido"
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddItem("itemsLost");
-                  }
-                }}
-              />
-              <Button size="sm" onClick={() => handleAddItem("itemsLost")}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-1">
-              {formData.items.itemsLost.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between bg-status-lost-light p-2 rounded"
-                >
-                  <span className="text-sm">{item}</span>
-                  <button
-                    onClick={() => handleRemoveItem("itemsLost", idx)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ItemsManager
+        items={formData.items}
+        onItemsChange={(newItems) =>
+          handleChange("items", newItems)
+        }
+      />
 
       {/* File Attachments */}
       <Card>
