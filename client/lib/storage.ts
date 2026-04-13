@@ -13,8 +13,9 @@ export const bidStorage = {
       return bids.map((bid: any) => {
         // Migrate old status values to new ones
         let status = bid.status;
-        if (status === "participate") status = "cadastrado";
+        if (status === "participate") status = "codificado";
         if (status === "analyzing") status = "questionamento";
+        if (status === "cadastrado") status = "codificado";
 
         return {
           ...bid,
