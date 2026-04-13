@@ -20,10 +20,10 @@ export function getBidColor(status: BidStatus) {
       text: "text-white",
       bgLight: "bg-status-questionamento-light text-status-questionamento",
     },
-    analise: {
-      bg: "bg-status-analise",
+    suspenso: {
+      bg: "bg-status-suspenso",
       text: "text-white",
-      bgLight: "bg-status-analise-light text-status-analise",
+      bgLight: "bg-status-suspenso-light text-status-suspenso",
     },
     won: {
       bg: "bg-status-won",
@@ -50,7 +50,7 @@ export function getStatusLabel(status: BidStatus): string {
     cadastrado: "Cadastrado",
     codificado: "Codificado",
     questionamento: "Questionamento",
-    analise: "Em Análise",
+    suspenso: "Suspenso",
     won: "Ganho",
     lost: "Perdido",
     nao_temos: "Não temos",
