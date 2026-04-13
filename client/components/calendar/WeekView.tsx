@@ -115,8 +115,8 @@ export function WeekView({
                       >
                         <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getBidColor(bid.status).bg}`} />
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-xs">{bid.disputeTime}</div>
-                          <div className="truncate text-xs">{getBidTypeAbbreviation(bid.bidType)}</div>
+                          <div className="font-semibold text-xs">{bid.disputeTime} {getBidTypeAbbreviation(bid.bidType)} {bid.bidNumber}</div>
+                          <div className="truncate text-xs text-gray-600">({bid.portal})</div>
                         </div>
                       </div>
                     ))}

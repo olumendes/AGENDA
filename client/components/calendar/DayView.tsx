@@ -71,8 +71,8 @@ export function DayView({
                   >
                     <div className={`w-3 h-3 rounded-full flex-shrink-0 mt-0.5 ${getBidColor(bid.status).bg}`} />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold">{bid.disputeTime}</div>
-                      <div className="truncate">{getBidTypeAbbreviation(bid.bidType)}</div>
+                      <div className="font-semibold">{bid.disputeTime} {getBidTypeAbbreviation(bid.bidType)} {bid.bidNumber}</div>
+                      <div className="truncate text-gray-600">({bid.portal})</div>
                     </div>
                   </div>
                 ))}

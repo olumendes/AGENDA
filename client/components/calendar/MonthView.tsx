@@ -124,8 +124,8 @@ export function MonthView({
                         getBidColor(bid.status).bg
                       )} />
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-xs">{bid.disputeTime}</div>
-                        <div className="truncate text-xs text-gray-700">{getBidTypeAbbreviation(bid.bidType)}</div>
+                        <div className="font-semibold text-xs">{bid.disputeTime} {getBidTypeAbbreviation(bid.bidType)} {bid.bidNumber}</div>
+                        <div className="truncate text-xs text-gray-600">({bid.portal})</div>
                       </div>
                     </div>
                   ))}
