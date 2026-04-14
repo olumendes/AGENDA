@@ -11,9 +11,10 @@ import {
   AlertDialogDescription,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Edit2, Trash2, Download, X } from "lucide-react";
+import { Edit2, Trash2, FolderOpen, X } from "lucide-react";
 import { getBidColor, getStatusLabel, formatDateTime, formatBidTitle } from "@/lib/bid-utils";
 import { BidForm } from "./BidForm";
+import { settingsStorage } from "@/lib/storage";
 
 interface BidDetailProps {
   bid: Bid;
@@ -43,9 +44,55 @@ function getAttachmentSections(attachments: BidAttachment[]) {
   return sections;
 }
 
+// Map attachment types to folder names (must match server-side mapping)
+const ATTACHMENT_FOLDERS: Record<string, string> = {
+  "proposta-inicial": "Proposta Inicial",
+  "proposta-final": "Proposta Final",
+  "empenhos": "Empenhos",
+  "atas": "Atas",
+  "edital": "Edital",
+  "termo": "Termo de Referência",
+  "resultado": "Resultado",
+  "outro": "Outros",
+};
+
+function buildAttachmentPath(bid: Bid, attachment: BidAttachment): string {
+  const settings = settingsStorage.getSettings();
+  const basePath = settings.rootPath;
+
+  const folderName = ATTACHMENT_FOLDERS[attachment.type] || ATTACHMENT_FOLDERS["outro"];
+  const filePath = `${basePath}/${bid.year}/${bid.state.toUpperCase()}/${bid.city}/${bid.bidNumber}/Anexos/${folderName}/${attachment.name}`;
+
+  return filePath;
+}
+
 export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isOpeningFile, setIsOpeningFile] = useState(false);
+
+  const handleOpenFile = async (attachment: BidAttachment) => {
+    try {
+      setIsOpeningFile(true);
+      const filePath = buildAttachmentPath(bid, attachment);
+
+      const response = await fetch("/api/bids/open-file", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filePath }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Erro ao abrir arquivo: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error opening file:", error);
+      alert("Erro ao abrir arquivo");
+    } finally {
+      setIsOpeningFile(false);
+    }
+  };
 
   if (isEditing) {
     return (
@@ -352,8 +399,13 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                                   {attachment.uploadedAt.toLocaleDateString("pt-BR")}
                                 </p>
                               </div>
-                              <Button size="sm" variant="outline">
-                                <Download className="h-4 w-4" />
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleOpenFile(attachment)}
+                                disabled={isOpeningFile}
+                              >
+                                <FolderOpen className="h-4 w-4" />
                               </Button>
                             </div>
                           ))}

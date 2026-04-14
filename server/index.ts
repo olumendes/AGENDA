@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { handleCreateBidFolder, handleSetBasePath } from "./routes/bids";
+import { handleCreateBidFolder, handleSetBasePath, handleOpenFile } from "./routes/bids";
 
 export function createServer() {
   const app = express();
@@ -23,6 +23,7 @@ export function createServer() {
   // Bid routes
   app.post("/api/bids/create-folder", handleCreateBidFolder);
   app.post("/api/bids/set-base-path", handleSetBasePath);
+  app.post("/api/bids/open-file", handleOpenFile);
 
   return app;
 }
