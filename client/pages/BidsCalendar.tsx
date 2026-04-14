@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Bid } from "@/types";
+import { Bid, BidStatus } from "@/types";
 import { bidStorage } from "@/lib/storage";
 import { Calendar } from "@/components/Calendar";
 import { SearchResults } from "@/components/SearchResults";
@@ -17,6 +17,7 @@ import { BidForm } from "@/components/BidForm";
 import { Plus, Settings, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { getStatusLabel } from "@/lib/bid-utils";
 
 const BRAZILIAN_STATES = [
   "AC",
@@ -48,6 +49,8 @@ const BRAZILIAN_STATES = [
   "TO",
 ];
 
+const STATUS_OPTIONS: BidStatus[] = ["cadastrado", "codificado", "questionamento", "suspenso", "won", "lost", "nao_temos"];
+
 export default function BidsCalendar() {
   const navigate = useNavigate();
   const [bids, setBids] = useState<Bid[]>([]);
@@ -57,6 +60,10 @@ export default function BidsCalendar() {
   const [filterState, setFilterState] = useState<string>("");
   const [filterCity, setFilterCity] = useState<string>("");
   const [filterYear, setFilterYear] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [filterDateStart, setFilterDateStart] = useState<string>("");
+  const [filterDateEnd, setFilterDateEnd] = useState<string>("");
+  const [filterItem, setFilterItem] = useState<string>("");
 
   useEffect(() => {
     loadBids();
@@ -124,7 +131,46 @@ export default function BidsCalendar() {
       const matchesYear =
         filterYear === "all" || filterYear === "" || bid.year.toString() === filterYear;
 
-      return matchesSearch && matchesState && matchesCity && matchesYear;
+      // Status filter
+      const matchesStatus =
+        filterStatus === "all" || filterStatus === "" || bid.status === filterStatus;
+
+      // Date range filter
+      let matchesDateRange = true;
+      if (filterDateStart || filterDateEnd) {
+        const bidDate = bid.disputeDate;
+        if (filterDateStart) {
+          const startDate = new Date(filterDateStart);
+          matchesDateRange = matchesDateRange && bidDate >= startDate;
+        }
+        if (filterDateEnd) {
+          const endDate = new Date(filterDateEnd);
+          endDate.setHours(23, 59, 59, 999);
+          matchesDateRange = matchesDateRange && bidDate <= endDate;
+        }
+      }
+
+      // Item filter
+      const itemLower = filterItem.toLowerCase();
+      const matchesItem =
+        filterItem === "" ||
+        bid.items.itemsRegistered.some((item) =>
+          item.description.toLowerCase().includes(itemLower) ||
+          item.code.toLowerCase().includes(itemLower) ||
+          item.number.toLowerCase().includes(itemLower)
+        ) ||
+        bid.items.itemsWon.some((item) =>
+          item.description.toLowerCase().includes(itemLower) ||
+          item.code.toLowerCase().includes(itemLower) ||
+          item.number.toLowerCase().includes(itemLower)
+        ) ||
+        bid.items.itemsLost.some((item) =>
+          item.description.toLowerCase().includes(itemLower) ||
+          item.code.toLowerCase().includes(itemLower) ||
+          item.number.toLowerCase().includes(itemLower)
+        );
+
+      return matchesSearch && matchesState && matchesCity && matchesYear && matchesStatus && matchesDateRange && matchesItem;
     });
   };
 
@@ -243,6 +289,69 @@ export default function BidsCalendar() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-gray-700 block mb-1">
+              Status
+            </label>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue placeholder="Todos os status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os status</SelectItem>
+                {STATUS_OPTIONS.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {getStatusLabel(status)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-gray-700 block mb-1">
+              Data de Disputa
+            </label>
+            <div className="space-y-2">
+              <Input
+                type="date"
+                value={filterDateStart}
+                onChange={(e) => setFilterDateStart(e.target.value)}
+                placeholder="Data inicial"
+                className="h-8 text-sm"
+              />
+              <Input
+                type="date"
+                value={filterDateEnd}
+                onChange={(e) => setFilterDateEnd(e.target.value)}
+                placeholder="Data final"
+                className="h-8 text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-gray-700 block mb-1">
+              Filtrar por Item
+            </label>
+            <div className="relative">
+              <Input
+                placeholder="Número, código ou descrição"
+                value={filterItem}
+                onChange={(e) => setFilterItem(e.target.value)}
+                className="h-8 text-sm"
+              />
+              {filterItem && (
+                <button
+                  onClick={() => setFilterItem("")}
+                  className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
