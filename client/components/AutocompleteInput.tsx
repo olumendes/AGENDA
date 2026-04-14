@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Command,
@@ -7,7 +7,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 interface AutocompleteInputProps {
@@ -26,83 +25,83 @@ export function AutocompleteInput({
   className,
 }: AutocompleteInputProps) {
   const [open, setOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(value);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setInputValue(value);
-  }, [value]);
-
-  useEffect(() => {
-    if (inputValue.trim()) {
+    if (value.trim()) {
       const filtered = suggestions.filter((suggestion) =>
-        suggestion.toLowerCase().includes(inputValue.toLowerCase())
+        suggestion.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredSuggestions(filtered);
       setOpen(filtered.length > 0);
     } else {
-      setFilteredSuggestions(suggestions);
       setOpen(false);
     }
-  }, [inputValue, suggestions]);
+  }, [value, suggestions]);
 
   const handleSelect = (suggestion: string) => {
-    setInputValue(suggestion);
     onChange(suggestion);
     setOpen(false);
+    inputRef.current?.focus();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
-    onChange(newValue);
+    onChange(e.target.value);
   };
 
+  // Close popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <div className="w-full">
-          <Input
-            value={inputValue}
-            onChange={handleInputChange}
-            onFocus={() => {
-              if (suggestions.length > 0) {
-                setOpen(true);
-              }
-            }}
-            placeholder={placeholder}
-            className={className}
-            autoComplete="off"
-          />
-        </div>
-      </PopoverTrigger>
-      {filteredSuggestions.length > 0 && (
-        <PopoverContent
-          className="p-0 w-full"
-          align="start"
-        >
+    <div ref={containerRef} className="relative w-full">
+      <Input
+        ref={inputRef}
+        value={value}
+        onChange={handleInputChange}
+        onFocus={() => {
+          if (suggestions.length > 0 && value.trim()) {
+            setOpen(true);
+          }
+        }}
+        placeholder={placeholder}
+        className={className}
+        autoComplete="off"
+      />
+      
+      {open && filteredSuggestions.length > 0 && (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 border rounded-md bg-white shadow-md">
           <Command>
             <CommandList>
-              {filteredSuggestions.length === 0 ? (
-                <CommandEmpty>Nenhuma sugestão encontrada</CommandEmpty>
-              ) : (
-                <CommandGroup>
-                  {filteredSuggestions.map((suggestion, index) => (
-                    <CommandItem
-                      key={`${suggestion}-${index}`}
-                      value={suggestion}
-                      onSelect={() => handleSelect(suggestion)}
-                      className="cursor-pointer"
-                    >
-                      {suggestion}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              )}
+              <CommandGroup>
+                {filteredSuggestions.map((suggestion, index) => (
+                  <CommandItem
+                    key={`${suggestion}-${index}`}
+                    value={suggestion}
+                    onSelect={() => handleSelect(suggestion)}
+                    className="cursor-pointer"
+                  >
+                    {suggestion}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
             </CommandList>
           </Command>
-        </PopoverContent>
+        </div>
       )}
-    </Popover>
+    </div>
   );
 }

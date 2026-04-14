@@ -250,11 +250,10 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">Número</label>
-              <AutocompleteInput
+              <Input
                 value={formData.bidNumber}
-                onChange={(value) => handleChange("bidNumber", value)}
+                onChange={(e) => handleChange("bidNumber", e.target.value)}
                 placeholder="ex: 123"
-                suggestions={suggestions.bidNumbers}
                 className="mt-1"
               />
             </div>
