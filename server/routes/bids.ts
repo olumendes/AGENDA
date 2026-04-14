@@ -158,31 +158,31 @@ export const handleOpenFile: RequestHandler = (req, res) => {
       return res.status(404).json({ error: "File or folder not found" });
     }
 
-    // Open the file/folder with the default application
+    // Open the file in file explorer/finder (selecting the file itself)
     const platform = os.platform();
     let command: string;
 
     if (platform === "win32") {
-      // Windows: use explorer to open folder or file
-      command = `start "" "${filePath}"`;
+      // Windows: use explorer with /select to highlight the file
+      command = `explorer /select, "${filePath}"`;
     } else if (platform === "darwin") {
-      // macOS: use open command
-      command = `open "${filePath}"`;
+      // macOS: use open -R to reveal in Finder
+      command = `open -R "${filePath}"`;
     } else {
-      // Linux: use xdg-open
-      command = `xdg-open "${filePath}"`;
+      // Linux: use nautilus or thunar to show file
+      command = `nautilus "${filePath}" 2>/dev/null || xdg-open "$(dirname "${filePath}")"`;
     }
 
     try {
-      execSync(command, { stdio: "ignore" });
+      execSync(command, { stdio: "ignore", shell: "/bin/bash" });
       res.json({
         success: true,
-        message: "File/folder opened successfully",
+        message: "File opened in explorer successfully",
       });
     } catch (execError) {
       console.error("Error executing open command:", execError);
       res.status(500).json({
-        error: "Failed to open file/folder",
+        error: "Failed to open file in explorer",
         details: execError instanceof Error ? execError.message : "Unknown error",
       });
     }
