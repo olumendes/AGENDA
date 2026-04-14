@@ -28,7 +28,7 @@ export function ItemsManager({ items, onItemsChange }: ItemsManagerProps) {
   const handleAddItem = () => {
     if (newNumber.trim() && newCode.trim()) {
       const newItem: BidItem = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         number: newNumber,
         code: newCode,
         description: newDescription || `${newNumber} - ${newCode}`,

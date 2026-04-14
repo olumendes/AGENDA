@@ -34,7 +34,7 @@ export function FileUpload({
       reader.onload = (e) => {
         const content = e.target?.result as string;
         const attachment: BidAttachment = {
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           name: file.name,
           type: "outro",
           url: content, // Em um app real, isso seria enviado para um servidor

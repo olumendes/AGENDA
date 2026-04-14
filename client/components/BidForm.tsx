@@ -87,7 +87,7 @@ function calculateStatusFromItems(items: {
 export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
   const [formData, setFormData] = useState<Bid>(
     bid || {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       title: "",
       bidType: "pregao_eletronico",
       bidNumber: "",
