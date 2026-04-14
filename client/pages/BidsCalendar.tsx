@@ -459,7 +459,7 @@ export default function BidsCalendar() {
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-3 px-6 text-center text-sm text-gray-600">
-        feito por Luan Mendes
+        Feito por Luan Mendes
       </footer>
     </div>
   );
