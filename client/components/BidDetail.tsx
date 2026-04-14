@@ -60,7 +60,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h1 className="text-2xl font-bold mb-2">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}</h1>
+              <h1 className="text-2xl font-bold mb-2">{formatBidTitle(bid.bidType, bid.bidNumber, bid.products, bid.portal)}</h1>
               <p className="opacity-90 text-sm">{bid.observation}</p>
             </div>
             <div className="flex gap-2">
@@ -205,7 +205,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                             key={item.id}
                             className="text-sm p-2 bg-gray-50 rounded text-gray-700"
                           >
-                            {item.description}
+                            {item.number} - {item.code}
                           </li>
                         ))}
                       </ul>
@@ -227,7 +227,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                             key={item.id}
                             className="text-sm p-2 bg-status-won-light rounded text-gray-700"
                           >
-                            {item.description}
+                            {item.number} - {item.code}
                           </li>
                         ))}
                       </ul>
@@ -249,7 +249,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                             key={item.id}
                             className="text-sm p-2 bg-status-lost-light rounded text-gray-700"
                           >
-                            {item.description}
+                            {item.number} - {item.code}
                           </li>
                         ))}
                       </ul>

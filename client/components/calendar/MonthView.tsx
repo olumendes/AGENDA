@@ -117,7 +117,7 @@ export function MonthView({
                         e.stopPropagation();
                         onSelectBid(bid);
                       }}
-                      title={formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}
+                      title={formatBidTitle(bid.bidType, bid.bidNumber, bid.products, bid.portal)}
                     >
                       <div className={cn(
                         "w-2 h-2 rounded-full flex-shrink-0",
@@ -177,7 +177,7 @@ export function MonthView({
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold">{bid.disputeTime}</div>
                   <div className="text-gray-600 text-xs">{bid.state} - {bid.city}</div>
-                  <div className="text-gray-700 mt-1">{formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}</div>
+                  <div className="text-gray-700 mt-1">{formatBidTitle(bid.bidType, bid.bidNumber, bid.products, bid.portal)}</div>
                 </div>
               </div>
             ))}

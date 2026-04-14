@@ -87,10 +87,11 @@ function calculateStatusFromItems(items: {
 export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
   const [formData, setFormData] = useState<Bid>(
     bid || {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       title: "",
       bidType: "pregao_eletronico",
       bidNumber: "",
+      products: "",
       observation: "",
       disputeDate: new Date(),
       disputeTime: "09:00",
@@ -131,6 +132,31 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
     try {
       setIsLoading(true);
       setError(null);
+
+      // Validar campos obrigatórios: Número, Portal, Produtos, Anexos
+      if (!formData.bidNumber.trim()) {
+        setError("O campo 'Número' é obrigatório.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!formData.portal.trim()) {
+        setError("O campo 'Portal' é obrigatório.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!formData.products.trim()) {
+        setError("O campo 'Produtos' é obrigatório.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (formData.attachments.length === 0) {
+        setError("É necessário adicionar pelo menos um anexo.");
+        setIsLoading(false);
+        return;
+      }
 
       // Save the bid first
       onSave(formData);
@@ -226,6 +252,16 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                 className="mt-1"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700">Produtos</label>
+            <Input
+              value={formData.products}
+              onChange={(e) => handleChange("products", e.target.value)}
+              placeholder="ex: Alimentos, Equipamentos, Peças"
+              className="mt-1"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

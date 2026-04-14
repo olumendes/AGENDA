@@ -174,6 +174,25 @@ export default function BidsCalendar() {
     });
   };
 
+  const getStatusBreakdownForCurrentMonth = () => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const bidsInCurrentMonth = bids.filter((bid) => {
+      const bidDate = bid.disputeDate;
+      return bidDate.getMonth() === currentMonth && bidDate.getFullYear() === currentYear;
+    });
+
+    return {
+      won: bidsInCurrentMonth.filter((b) => b.status === "won").length,
+      lost: bidsInCurrentMonth.filter((b) => b.status === "lost").length,
+      suspenso: bidsInCurrentMonth.filter((b) => b.status === "suspenso").length,
+      total: bidsInCurrentMonth.length,
+    };
+  };
+
+  const statusBreakdown = getStatusBreakdownForCurrentMonth();
   const filteredBids = getFilteredBids();
   const uniqueCities = Array.from(new Set(bids.map((b) => b.city)))
     .filter(Boolean)
@@ -355,8 +374,40 @@ export default function BidsCalendar() {
           </div>
         </div>
 
+        {/* Status Breakdown - Current Month */}
+        <div className="p-4 bg-gray-50 border-t border-gray-200 space-y-3">
+          <div className="text-xs font-semibold text-gray-700 mb-3">
+            MÊS ATUAL
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Ganho</span>
+              <span className="font-semibold text-status-won">
+                {statusBreakdown.won}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Perdido</span>
+              <span className="font-semibold text-status-lost">
+                {statusBreakdown.lost}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Suspenso</span>
+              <span className="font-semibold text-status-suspenso">
+                {statusBreakdown.suspenso}
+              </span>
+            </div>
+            <div className="h-px bg-gray-200 my-2"></div>
+            <div className="flex items-center justify-between text-sm font-semibold">
+              <span className="text-gray-900">Total</span>
+              <span className="text-gray-900">{statusBreakdown.total}</span>
+            </div>
+          </div>
+        </div>
+
         {/* Results Summary */}
-        <div className="p-4 bg-gray-50 border-t border-gray-200 text-sm text-gray-600">
+        <div className="p-4 bg-white border-t border-gray-200 text-sm text-gray-600">
           {filteredBids.length} licitação{filteredBids.length !== 1 ? "s" : ""} encontrada{filteredBids.length !== 1 ? "s" : ""}
         </div>
       </div>

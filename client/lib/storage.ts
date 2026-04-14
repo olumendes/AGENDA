@@ -19,6 +19,7 @@ export const bidStorage = {
         return {
           ...bid,
           status,
+          products: bid.products || "",
           disputeDate: new Date(bid.disputeDate),
           createdAt: new Date(bid.createdAt),
           updatedAt: new Date(bid.updatedAt),

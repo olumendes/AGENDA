@@ -13,6 +13,7 @@ export interface Bid {
   title: string; // TIPO + NÚMERO - PRODUTOS (PORTAL)
   bidType: BidType;
   bidNumber: string;
+  products: string; // Produtos/descrição do edital
   observation: string; // Nome do órgão + complementos + número do processo
   disputeDate: Date;
   disputeTime: string; // HH:mm format

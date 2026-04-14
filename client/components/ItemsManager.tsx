@@ -28,7 +28,7 @@ export function ItemsManager({ items, onItemsChange }: ItemsManagerProps) {
   const handleAddItem = () => {
     if (newNumber.trim() && newCode.trim()) {
       const newItem: BidItem = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         number: newNumber,
         code: newCode,
         description: newDescription || `${newNumber} - ${newCode}`,
@@ -101,11 +101,7 @@ export function ItemsManager({ items, onItemsChange }: ItemsManagerProps) {
       )}
     >
       <div className="flex-1 min-w-0">
-        <div className="flex gap-2 text-xs font-medium">
-          <span className="font-bold">#{item.number}</span>
-          <span className="text-gray-600">[{item.code}]</span>
-        </div>
-        <p className="text-sm truncate">{item.description}</p>
+        <p className="text-sm truncate">{item.number} - {item.code}</p>
       </div>
       <button
         onClick={() => handleRemoveItem(category, item.id)}
