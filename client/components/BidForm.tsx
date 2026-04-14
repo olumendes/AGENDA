@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Bid, BidStatus, BidAttachment, BidType, BidItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +12,10 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBidColor } from "@/lib/bid-utils";
-import { settingsStorage } from "@/lib/storage";
+import { settingsStorage, bidStorage } from "@/lib/storage";
 import { FileUpload } from "./FileUpload";
 import { ItemsManager } from "./ItemsManager";
+import { AutocompleteInput } from "./AutocompleteInput";
 import { AlertCircle } from "lucide-react";
 
 interface BidFormProps {
@@ -114,6 +115,19 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Get suggestions from bid history
+  const suggestions = useMemo(() => {
+    const allBids = bidStorage.getBids();
+
+    return {
+      bidNumbers: Array.from(new Set(allBids.map(b => b.bidNumber).filter(Boolean))).sort(),
+      portals: Array.from(new Set(allBids.map(b => b.portal).filter(Boolean))).sort(),
+      products: Array.from(new Set(allBids.map(b => b.products).filter(Boolean))).sort(),
+      cities: Array.from(new Set(allBids.map(b => b.city).filter(Boolean))).sort(),
+      years: Array.from(new Set(allBids.map(b => b.year.toString()).filter(Boolean))).sort().reverse(),
+    };
+  }, []);
 
 
   const handleChange = (
@@ -236,19 +250,21 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">Número</label>
-              <Input
+              <AutocompleteInput
                 value={formData.bidNumber}
-                onChange={(e) => handleChange("bidNumber", e.target.value)}
+                onChange={(value) => handleChange("bidNumber", value)}
                 placeholder="ex: 123"
+                suggestions={suggestions.bidNumbers}
                 className="mt-1"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">Portal</label>
-              <Input
+              <AutocompleteInput
                 value={formData.portal}
-                onChange={(e) => handleChange("portal", e.target.value)}
+                onChange={(value) => handleChange("portal", value)}
                 placeholder="ex: ComprasNet, BLL, Licitanet"
+                suggestions={suggestions.portals}
                 className="mt-1"
               />
             </div>
@@ -256,10 +272,11 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
 
           <div>
             <label className="text-sm font-medium text-gray-700">Produtos</label>
-            <Input
+            <AutocompleteInput
               value={formData.products}
-              onChange={(e) => handleChange("products", e.target.value)}
+              onChange={(value) => handleChange("products", value)}
               placeholder="ex: Alimentos, Equipamentos, Peças"
+              suggestions={suggestions.products}
               className="mt-1"
             />
           </div>
@@ -360,10 +377,14 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700">Ano</label>
-              <Input
-                type="number"
-                value={formData.year}
-                onChange={(e) => handleChange("year", parseInt(e.target.value))}
+              <AutocompleteInput
+                value={formData.year.toString()}
+                onChange={(value) => {
+                  const numValue = parseInt(value) || new Date().getFullYear();
+                  handleChange("year", numValue);
+                }}
+                placeholder={new Date().getFullYear().toString()}
+                suggestions={suggestions.years}
                 className="mt-1"
               />
             </div>
@@ -386,10 +407,11 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">Município</label>
-              <Input
+              <AutocompleteInput
                 value={formData.city}
-                onChange={(e) => handleChange("city", e.target.value)}
+                onChange={(value) => handleChange("city", value)}
                 placeholder="Nome do município"
+                suggestions={suggestions.cities}
                 className="mt-1"
               />
             </div>
