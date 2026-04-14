@@ -18,6 +18,8 @@ export interface Bid {
   disputeDate: Date;
   disputeTime: string; // HH:mm format
   portal: string;
+  codigoEffecti: string;
+  uasg: string;
   status: BidStatus;
   year: number;
   state: string;
