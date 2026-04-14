@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bid, BidStatus, BidAttachment, BidType } from "@/types";
+import { Bid, BidStatus, BidAttachment, BidType, BidItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,8 +12,10 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBidColor } from "@/lib/bid-utils";
+import { settingsStorage } from "@/lib/storage";
 import { FileUpload } from "./FileUpload";
 import { ItemsManager } from "./ItemsManager";
+import { AlertCircle } from "lucide-react";
 
 interface BidFormProps {
   bid?: Bid;
@@ -60,7 +62,27 @@ const BID_TYPE_LABELS: Record<BidType, string> = {
   pregao_presencial: "Pregão Presencial",
 };
 
-const STATUS_OPTIONS: BidStatus[] = ["codificado", "questionamento", "won", "lost", "nao_temos"];
+const STATUS_OPTIONS: BidStatus[] = ["cadastrado", "codificado", "questionamento", "suspenso", "won", "lost", "nao_temos"];
+
+function calculateStatusFromItems(items: {
+  itemsRegistered: BidItem[];
+  itemsWon: BidItem[];
+  itemsLost: BidItem[];
+}): BidStatus {
+  // Se tem itens ganhos, status é "won"
+  if (items.itemsWon.length > 0) {
+    return "won";
+  }
+
+  // Se tem itens e todos estão em perdidos, status é "lost"
+  const totalItems = items.itemsRegistered.length + items.itemsWon.length + items.itemsLost.length;
+  if (totalItems > 0 && items.itemsWon.length === 0 && items.itemsLost.length === totalItems) {
+    return "lost";
+  }
+
+  // Padrão é cadastrado
+  return "cadastrado";
+}
 
 export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
   const [formData, setFormData] = useState<Bid>(
@@ -73,7 +95,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       disputeDate: new Date(),
       disputeTime: "09:00",
       portal: "",
-      status: "codificado",
+      status: "cadastrado",
       year: new Date().getFullYear(),
       state: "",
       city: "",
@@ -89,6 +111,8 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       updatedAt: new Date(),
     }
   );
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
 
   const handleChange = (
@@ -103,8 +127,56 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
   };
 
 
-  const handleSubmit = () => {
-    onSave(formData);
+  const handleSubmit = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Save the bid first
+      onSave(formData);
+
+      // Create folder structure if basePath is configured
+      const basePath = settingsStorage.getBasePath();
+      if (basePath && basePath.trim()) {
+        try {
+          const response = await fetch("/api/bids/create-folder", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              basePath,
+              bid: {
+                id: formData.id,
+                year: formData.year,
+                state: formData.state,
+                city: formData.city,
+                bidNumber: formData.bidNumber,
+                notes: formData.notes,
+                attachments: formData.attachments,
+              },
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.warn(
+              "Failed to create bid folder:",
+              errorData.details || errorData.error
+            );
+          }
+        } catch (folderError) {
+          console.warn("Could not create folder structure:", folderError);
+          // Don't block bid saving if folder creation fails
+        }
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erro ao salvar licitação"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -221,6 +293,12 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                     Questionamento
                   </div>
                 </SelectItem>
+                <SelectItem value="suspenso">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("suspenso").bg}`} />
+                    Suspenso
+                  </div>
+                </SelectItem>
                 <SelectItem value="won">
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${getBidColor("won").bg}`} />
@@ -301,9 +379,15 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       {/* Items Management */}
       <ItemsManager
         items={formData.items}
-        onItemsChange={(newItems) =>
-          handleChange("items", newItems)
-        }
+        onItemsChange={(newItems, changeType) => {
+          const newStatus = calculateStatusFromItems(newItems);
+          setFormData((prev) => ({
+            ...prev,
+            items: newItems,
+            status: newStatus,
+            updatedAt: new Date(),
+          }));
+        }}
       />
 
       {/* File Attachments */}
@@ -332,13 +416,30 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
         </CardContent>
       </Card>
 
+      {/* Error Alert */}
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-medium text-red-800">Erro</h3>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Form Actions */}
       <div className="flex gap-3 justify-end">
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="outline" onClick={onCancel} disabled={isLoading}>
           Cancelar
         </Button>
-        <Button onClick={handleSubmit} className="bg-primary text-white">
-          Salvar Licitação
+        <Button
+          onClick={handleSubmit}
+          className="bg-primary text-white"
+          disabled={isLoading}
+        >
+          {isLoading ? "Salvando..." : "Salvar Licitação"}
         </Button>
       </div>
     </div>

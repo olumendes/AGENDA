@@ -16,7 +16,7 @@ interface ItemsManagerProps {
     itemsRegistered: BidItem[];
     itemsWon: BidItem[];
     itemsLost: BidItem[];
-  }) => void;
+  }, changeType?: 'add' | 'move') => void;
 }
 
 export function ItemsManager({ items, onItemsChange }: ItemsManagerProps) {
@@ -34,10 +34,12 @@ export function ItemsManager({ items, onItemsChange }: ItemsManagerProps) {
         description: newDescription || `${newNumber} - ${newCode}`,
       };
 
-      onItemsChange({
+      const updatedItems = {
         ...items,
         itemsRegistered: [...items.itemsRegistered, newItem],
-      });
+      };
+
+      onItemsChange(updatedItems, 'add');
 
       setNewNumber("");
       setNewCode("");
@@ -80,7 +82,7 @@ export function ItemsManager({ items, onItemsChange }: ItemsManagerProps) {
       [targetCategory]: [...items[targetCategory], item],
     };
 
-    onItemsChange(updatedItems);
+    onItemsChange(updatedItems, 'move');
     setDraggedItem(null);
   };
 

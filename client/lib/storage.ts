@@ -15,7 +15,6 @@ export const bidStorage = {
         let status = bid.status;
         if (status === "participate") status = "codificado";
         if (status === "analyzing") status = "questionamento";
-        if (status === "cadastrado") status = "codificado";
 
         return {
           ...bid,
@@ -84,5 +83,16 @@ export const settingsStorage = {
 
   saveSettings: (settings: AppSettings) => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  },
+
+  getBasePath: (): string => {
+    const settings = settingsStorage.getSettings();
+    return settings.rootPath;
+  },
+
+  setBasePath: (basePath: string) => {
+    const settings = settingsStorage.getSettings();
+    settings.rootPath = basePath;
+    settingsStorage.saveSettings(settings);
   },
 };
