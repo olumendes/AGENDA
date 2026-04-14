@@ -133,6 +133,31 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       setIsLoading(true);
       setError(null);
 
+      // Validar campos obrigatórios: Número, Portal, Produtos, Anexos
+      if (!formData.bidNumber.trim()) {
+        setError("O campo 'Número' é obrigatório.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!formData.portal.trim()) {
+        setError("O campo 'Portal' é obrigatório.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!formData.products.trim()) {
+        setError("O campo 'Produtos' é obrigatório.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (formData.attachments.length === 0) {
+        setError("É necessário adicionar pelo menos um anexo.");
+        setIsLoading(false);
+        return;
+      }
+
       // Save the bid first
       onSave(formData);
 
