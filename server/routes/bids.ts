@@ -69,14 +69,32 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
       });
     }
 
+    // Validate required fields for path construction
+    if (!bid.bidNumber || !bid.year) {
+      return res.status(400).json({
+        error: "Invalid bid data",
+        details: "Número da licitação e ano são obrigatórios para criar a pasta."
+      });
+    }
+
     // Create folder structure: basePath/YEAR/STATE/CITY/BIDNUMBER
-    const bidFolderPath = path.join(
+    // Use state and city only if provided, to avoid extra slashes
+    const pathParts = [
       basePath,
       bid.year.toString(),
-      bid.state.toUpperCase(),
-      bid.city,
-      bid.bidNumber
-    );
+    ];
+
+    if (bid.state && bid.state.trim()) {
+      pathParts.push(bid.state.toUpperCase());
+    }
+
+    if (bid.city && bid.city.trim()) {
+      pathParts.push(bid.city);
+    }
+
+    pathParts.push(bid.bidNumber);
+
+    const bidFolderPath = path.join(...pathParts);
 
     const docsPath = path.join(bidFolderPath, "Docs");
     const anexosPath = path.join(bidFolderPath, "Anexos");
@@ -202,7 +220,11 @@ export const handleOpenFile: RequestHandler = (req, res) => {
 
     // Verify the file/folder exists
     if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: "File or folder not found" });
+      return res.status(404).json({
+        error: "File or folder not found",
+        details: `O caminho não existe: ${filePath}\n\nVerifique se a pasta foi criada corretamente ao salvar a licitação.`,
+        path: filePath
+      });
     }
 
     const isDirectory = fs.statSync(filePath).isDirectory();
