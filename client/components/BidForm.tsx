@@ -99,6 +99,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       portal: "",
       codigoEffecti: "",
       uasg: "",
+      codigoBancoDoBrasil: "",
       status: "cadastrado",
       year: new Date().getFullYear(),
       state: "",
@@ -302,6 +303,18 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
               />
             </div>
           </div>
+
+          {formData.portal === "LICITACOES-E" && (
+            <div>
+              <label className="text-sm font-medium text-gray-700">Codigo Banco do Brasil</label>
+              <Input
+                value={formData.codigoBancoDoBrasil || ""}
+                onChange={(e) => handleChange("codigoBancoDoBrasil", e.target.value)}
+                placeholder="ex: 123456"
+                className="mt-1"
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

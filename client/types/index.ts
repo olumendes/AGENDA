@@ -20,6 +20,7 @@ export interface Bid {
   portal: string;
   codigoEffecti: string;
   uasg: string;
+  codigoBancoDoBrasil?: string;
   status: BidStatus;
   year: number;
   state: string;
