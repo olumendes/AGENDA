@@ -94,36 +94,62 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isOpeningFile, setIsOpeningFile] = useState(false);
 
-  const handleOpenFile = (attachment: BidAttachment) => {
-    const filePath = buildAttachmentPath(bid, attachment);
+  const handleOpenFile = async (attachment: BidAttachment) => {
+    try {
+      setIsOpeningFile(true);
+      const filePath = buildAttachmentPath(bid, attachment);
 
-    if (!filePath) {
-      alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
-      return;
+      if (!filePath) {
+        alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
+        setIsOpeningFile(false);
+        return;
+      }
+
+      const response = await fetch("/api/bids/open-file", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filePath }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Erro ao abrir arquivo: ${error.details || error.error}`);
+      }
+    } catch (error) {
+      console.error("Error opening file:", error);
+      alert("Erro ao abrir arquivo");
+    } finally {
+      setIsOpeningFile(false);
     }
-
-    // Convert Windows path to file:// URL
-    // Z:\folder\file.txt -> file:///Z:/folder/file.txt
-    const fileUrl = "file:///" + filePath.replace(/\\/g, "/").replace(/:/g, (match, offset) => offset === 1 ? ":" : match);
-
-    // Open via file protocol
-    window.open(fileUrl, "_blank");
   };
 
-  const handleOpenBidFolder = () => {
-    const folderPath = buildBidFolderPath(bid);
+  const handleOpenBidFolder = async () => {
+    try {
+      setIsOpeningFile(true);
+      const folderPath = buildBidFolderPath(bid);
 
-    if (!folderPath) {
-      alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
-      return;
+      if (!folderPath) {
+        alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
+        setIsOpeningFile(false);
+        return;
+      }
+
+      const response = await fetch("/api/bids/open-file", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filePath: folderPath }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Erro ao abrir pasta: ${error.details || error.error}`);
+      }
+    } catch (error) {
+      console.error("Error opening folder:", error);
+      alert("Erro ao abrir pasta do processo");
+    } finally {
+      setIsOpeningFile(false);
     }
-
-    // Convert Windows path to file:// URL
-    // Z:\folder -> file:///Z:/folder
-    const folderUrl = "file:///" + folderPath.replace(/\\/g, "/").replace(/:/g, (match, offset) => offset === 1 ? ":" : match);
-
-    // Open via file protocol
-    window.open(folderUrl, "_blank");
   };
 
   if (isEditing) {
