@@ -84,4 +84,15 @@ export const settingsStorage = {
   saveSettings: (settings: AppSettings) => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   },
+
+  getBasePath: (): string => {
+    const settings = settingsStorage.getSettings();
+    return settings.rootPath;
+  },
+
+  setBasePath: (basePath: string) => {
+    const settings = settingsStorage.getSettings();
+    settings.rootPath = basePath;
+    settingsStorage.saveSettings(settings);
+  },
 };
