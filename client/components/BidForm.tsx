@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBidColor } from "@/lib/bid-utils";
 import { settingsStorage, bidStorage } from "@/lib/storage";
+import { generateUUID } from "@/lib/utils";
 import { FileUpload } from "./FileUpload";
 import { ItemsManager } from "./ItemsManager";
 import { AutocompleteInput } from "./AutocompleteInput";
@@ -86,50 +87,97 @@ function calculateStatusFromItems(items: {
 }
 
 export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
-  const [formData, setFormData] = useState<Bid>(
-    bid || {
-      id: crypto.randomUUID(),
-      title: "",
-      bidType: "pregao_eletronico",
-      bidNumber: "",
-      products: "",
-      observation: "",
-      disputeDate: new Date(),
-      disputeTime: "09:00",
-      portal: "",
-      codigoEffecti: "",
-      uasg: "",
-      codigoBancoDoBrasil: "",
-      status: "cadastrado",
-      year: new Date().getFullYear(),
-      state: "",
-      city: "",
-      notes: "",
-      items: {
-        itemsRegistered: [],
-        itemsWon: [],
-        itemsLost: [],
-      },
-      attachments: [],
-      processHistory: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+  const [formData, setFormData] = useState<Bid>(() => {
+    try {
+      if (bid) {
+        return bid;
+      }
+
+      return {
+        id: generateUUID(),
+        title: "",
+        bidType: "pregao_eletronico",
+        bidNumber: "",
+        products: "",
+        observation: "",
+        disputeDate: new Date(),
+        disputeTime: "09:00",
+        portal: "",
+        codigoEffecti: "",
+        uasg: "",
+        codigoBancoDoBrasil: "",
+        status: "cadastrado",
+        year: new Date().getFullYear(),
+        state: "",
+        city: "",
+        notes: "",
+        items: {
+          itemsRegistered: [],
+          itemsWon: [],
+          itemsLost: [],
+        },
+        attachments: [],
+        processHistory: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    } catch (error) {
+      console.error("Error initializing BidForm:", error);
+      return {
+        id: generateUUID(),
+        title: "",
+        bidType: "pregao_eletronico",
+        bidNumber: "",
+        products: "",
+        observation: "",
+        disputeDate: new Date(),
+        disputeTime: "09:00",
+        portal: "",
+        codigoEffecti: "",
+        uasg: "",
+        codigoBancoDoBrasil: "",
+        status: "cadastrado",
+        year: new Date().getFullYear(),
+        state: "",
+        city: "",
+        notes: "",
+        items: {
+          itemsRegistered: [],
+          itemsWon: [],
+          itemsLost: [],
+        },
+        attachments: [],
+        processHistory: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
     }
-  );
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Get suggestions from bid history
   const suggestions = useMemo(() => {
-    const allBids = bidStorage.getBids();
+    try {
+      const allBids = bidStorage.getBids();
 
-    return {
-      bidNumbers: Array.from(new Set(allBids.map(b => b.bidNumber).filter(Boolean))).sort(),
-      portals: Array.from(new Set(allBids.map(b => b.portal).filter(Boolean))).sort(),
-      products: Array.from(new Set(allBids.map(b => b.products).filter(Boolean))).sort(),
-      cities: Array.from(new Set(allBids.map(b => b.city).filter(Boolean))).sort(),
-      years: Array.from(new Set(allBids.map(b => b.year.toString()).filter(Boolean))).sort().reverse(),
-    };
+      return {
+        bidNumbers: Array.from(new Set(allBids.map(b => b.bidNumber).filter(Boolean))).sort(),
+        portals: Array.from(new Set(allBids.map(b => b.portal).filter(Boolean))).sort(),
+        products: Array.from(new Set(allBids.map(b => b.products).filter(Boolean))).sort(),
+        cities: Array.from(new Set(allBids.map(b => b.city).filter(Boolean))).sort(),
+        years: Array.from(new Set(allBids.map(b => b.year.toString()).filter(Boolean))).sort().reverse(),
+      };
+    } catch (error) {
+      console.error("Error loading suggestions:", error);
+      return {
+        bidNumbers: [],
+        portals: [],
+        products: [],
+        cities: [],
+        years: [],
+      };
+    }
   }, []);
 
 
@@ -203,10 +251,21 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
 
           if (!response.ok) {
             const errorData = await response.json();
-            console.warn(
-              "Failed to create bid folder:",
-              errorData.details || errorData.error
-            );
+            const errorMsg = errorData.details || errorData.error;
+
+            if (errorMsg.includes("EPERM") || errorMsg.includes("permission")) {
+              console.warn(
+                "⚠️ Aviso: Sem permissão para criar pasta. Verifique se tem acesso de escrita em:",
+                basePath,
+                "\nDetalhes:",
+                errorMsg
+              );
+            } else {
+              console.warn(
+                "Failed to create bid folder:",
+                errorMsg
+              );
+            }
           }
         } catch (folderError) {
           console.warn("Could not create folder structure:", folderError);
@@ -373,6 +432,12 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${getBidColor("codificado").bg}`} />
                     Codificado
+                  </div>
+                </SelectItem>
+                <SelectItem value="nao_codificado_flamingo">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("nao_codificado_flamingo").bg}`} />
+                    Não codificado
                   </div>
                 </SelectItem>
                 <SelectItem value="questionamento">

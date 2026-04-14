@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, generateUUID } from "@/lib/utils";
 
 interface ItemsManagerProps {
   items: {
@@ -28,7 +28,7 @@ export function ItemsManager({ items, onItemsChange }: ItemsManagerProps) {
   const handleAddItem = () => {
     if (newNumber.trim() && newCode.trim()) {
       const newItem: BidItem = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         number: newNumber,
         code: newCode,
         description: newDescription || `${newNumber} - ${newCode}`,

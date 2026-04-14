@@ -188,6 +188,7 @@ export default function BidsCalendar() {
       won: bidsInCurrentMonth.filter((b) => b.status === "won").length,
       lost: bidsInCurrentMonth.filter((b) => b.status === "lost").length,
       suspenso: bidsInCurrentMonth.filter((b) => b.status === "suspenso").length,
+      nao_codificado_flamingo: bidsInCurrentMonth.filter((b) => b.status === "nao_codificado_flamingo").length,
       total: bidsInCurrentMonth.length,
     };
   };
@@ -391,6 +392,12 @@ export default function BidsCalendar() {
               <span className="text-gray-600">Suspenso</span>
               <span className="font-semibold text-status-suspenso">
                 {statusBreakdown.suspenso}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Não codificado</span>
+              <span className="font-semibold text-status-nao_codificado_flamingo">
+                {statusBreakdown.nao_codificado_flamingo}
               </span>
             </div>
             <div className="h-px bg-gray-200 my-2"></div>
