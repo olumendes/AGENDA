@@ -375,6 +375,12 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                     Codificado
                   </div>
                 </SelectItem>
+                <SelectItem value="nao_codificado_flamingo">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${getBidColor("nao_codificado_flamingo").bg}`} />
+                    Não codificado
+                  </div>
+                </SelectItem>
                 <SelectItem value="questionamento">
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${getBidColor("questionamento").bg}`} />
