@@ -20,7 +20,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240916.0",
     "itty-router": "^5.1.2",
-    "itty-router-extras": "^0.7.5",
+    "itty-router-extras": "^0.4.6",
     "wrangler": "^3.64.0",
     "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-accordion": "^1.2.11",
