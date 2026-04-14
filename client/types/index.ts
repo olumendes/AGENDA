@@ -41,7 +41,7 @@ export interface Bid {
 export interface BidAttachment {
   id: string;
   name: string;
-  type: "edital" | "termo" | "atas" | "proposta-inicial" | "proposta-final" | "outro";
+  type: "proposta-inicial" | "proposta-final" | "empenhos" | "atas" | "edital" | "termo" | "resultado" | "outro";
   url: string;
   uploadedAt: Date;
 }

@@ -22,6 +22,27 @@ interface BidDetailProps {
   onClose: () => void;
 }
 
+const ATTACHMENT_SECTION_ORDER = [
+  { type: "proposta-inicial" as const, label: "Proposta Inicial" },
+  { type: "proposta-final" as const, label: "Proposta Final" },
+  { type: "empenhos" as const, label: "Empenhos" },
+  { type: "atas" as const, label: "Atas" },
+  { type: "edital" as const, label: "Edital" },
+  { type: "termo" as const, label: "Termo de Referência" },
+  { type: "resultado" as const, label: "Resultado" },
+  { type: "outro" as const, label: "Outros" },
+];
+
+function getAttachmentSections(attachments: BidAttachment[]) {
+  const sections = ATTACHMENT_SECTION_ORDER.map((section) => ({
+    type: section.type,
+    label: section.label,
+    attachments: attachments.filter((att) => att.type === section.type),
+  })).filter((section) => section.attachments.length > 0);
+
+  return sections;
+}
+
 export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -308,37 +329,48 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
 
             {/* Attachments */}
             <TabsContent value="attachments">
-              <Card>
-                <CardContent className="pt-6">
-                  {bid.attachments.length > 0 ? (
-                    <div className="space-y-2">
-                      {bid.attachments.map((attachment) => (
-                        <div
-                          key={attachment.id}
-                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
-                        >
-                          <div>
-                            <p className="font-medium text-sm">
-                              {attachment.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {attachment.type} - Enviado em{" "}
-                              {attachment.uploadedAt.toLocaleDateString("pt-BR")}
-                            </p>
-                          </div>
-                          <Button size="sm" variant="outline">
-                            <Download className="h-4 w-4" />
-                          </Button>
+              {bid.attachments.length > 0 ? (
+                <div className="space-y-4">
+                  {getAttachmentSections(bid.attachments).map((section) => (
+                    <Card key={section.type}>
+                      <CardHeader>
+                        <CardTitle className="text-base">{section.label}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {section.attachments.map((attachment) => (
+                            <div
+                              key={attachment.id}
+                              className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                            >
+                              <div>
+                                <p className="font-medium text-sm">
+                                  {attachment.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Enviado em{" "}
+                                  {attachment.uploadedAt.toLocaleDateString("pt-BR")}
+                                </p>
+                              </div>
+                              <Button size="sm" variant="outline">
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="pt-6">
                     <p className="text-gray-500 text-sm italic">
                       Nenhum anexo adicionado ainda
                     </p>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             {/* History */}
