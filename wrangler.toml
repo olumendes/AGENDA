@@ -1,20 +1,9 @@
 name = "licitacaoagenda"
-type = "javascript"
-compatibility_date = "2024-12-16"
-
-# Pages configuration
 pages_build_output_dir = "dist/spa"
-
-# Build configuration
-build = { command = "npm run build", cwd = "." }
 
 # Environment variables
 [env.production]
-name = "licitacaoagenda"
-pages_build_output_dir = "dist/spa"
 vars = { ENVIRONMENT = "production" }
 
-[env.staging]
-name = "licitacaoagenda-staging"
-pages_build_output_dir = "dist/spa"
-vars = { ENVIRONMENT = "staging" }
+[env.preview]
+vars = { ENVIRONMENT = "preview" }
