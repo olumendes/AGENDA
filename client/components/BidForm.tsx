@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBidColor } from "@/lib/bid-utils";
 import { settingsStorage, bidStorage } from "@/lib/storage";
+import { generateUUID } from "@/lib/utils";
 import { FileUpload } from "./FileUpload";
 import { ItemsManager } from "./ItemsManager";
 import { AutocompleteInput } from "./AutocompleteInput";
@@ -93,7 +94,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       }
 
       return {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         title: "",
         bidType: "pregao_eletronico",
         bidNumber: "",
@@ -123,7 +124,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
     } catch (error) {
       console.error("Error initializing BidForm:", error);
       return {
-        id: "",
+        id: generateUUID(),
         title: "",
         bidType: "pregao_eletronico",
         bidNumber: "",

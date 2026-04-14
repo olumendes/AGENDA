@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { BidAttachment } from "@/types";
 import { Upload, X, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { generateUUID } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -44,7 +45,7 @@ export function FileUpload({
       reader.onload = (e) => {
         const content = e.target?.result as string;
         const attachment: BidAttachment = {
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           name: file.name,
           type: selectedType,
           url: content, // Em um app real, isso seria enviado para um servidor
