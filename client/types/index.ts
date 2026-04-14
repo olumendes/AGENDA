@@ -53,6 +53,7 @@ export interface ProcessHistoryEntry {
 }
 
 export interface AppSettings {
-  rootPath: string;
+  rootPath: string; // Server path (where the app is running)
+  clientBasePath: string; // Client path (where user accesses from)
   autoSaveEnabled: boolean;
 }

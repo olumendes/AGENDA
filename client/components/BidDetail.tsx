@@ -58,7 +58,12 @@ const ATTACHMENT_FOLDERS: Record<string, string> = {
 
 function buildAttachmentPath(bid: Bid, attachment: BidAttachment): string {
   const settings = settingsStorage.getSettings();
-  const basePath = settings.rootPath;
+  // Use clientBasePath to open files on user's computer
+  const basePath = settings.clientBasePath || settings.rootPath;
+
+  if (!basePath) {
+    return "";
+  }
 
   const folderName = ATTACHMENT_FOLDERS[attachment.type] || ATTACHMENT_FOLDERS["outro"];
   const filePath = `${basePath}/${bid.year}/${bid.state.toUpperCase()}/${bid.city}/${bid.bidNumber}/Anexos/${folderName}/${attachment.name}`;
@@ -68,7 +73,12 @@ function buildAttachmentPath(bid: Bid, attachment: BidAttachment): string {
 
 function buildBidFolderPath(bid: Bid): string {
   const settings = settingsStorage.getSettings();
-  const basePath = settings.rootPath;
+  // Use clientBasePath to open folders on user's computer
+  const basePath = settings.clientBasePath || settings.rootPath;
+
+  if (!basePath) {
+    return "";
+  }
 
   const folderPath = `${basePath}/${bid.year}/${bid.state.toUpperCase()}/${bid.city}/${bid.bidNumber}`;
 
@@ -85,6 +95,12 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
       setIsOpeningFile(true);
       const filePath = buildAttachmentPath(bid, attachment);
 
+      if (!filePath) {
+        alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
+        setIsOpeningFile(false);
+        return;
+      }
+
       const response = await fetch("/api/bids/open-file", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -93,7 +109,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        alert(`Erro ao abrir arquivo: ${error.error}`);
+        alert(`Erro ao abrir arquivo: ${error.details || error.error}`);
       }
     } catch (error) {
       console.error("Error opening file:", error);
@@ -108,6 +124,12 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
       setIsOpeningFile(true);
       const folderPath = buildBidFolderPath(bid);
 
+      if (!folderPath) {
+        alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
+        setIsOpeningFile(false);
+        return;
+      }
+
       const response = await fetch("/api/bids/open-file", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -116,7 +138,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        alert(`Erro ao abrir pasta: ${error.error}`);
+        alert(`Erro ao abrir pasta: ${error.details || error.error}`);
       }
     } catch (error) {
       console.error("Error opening folder:", error);

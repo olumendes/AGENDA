@@ -84,6 +84,7 @@ export const settingsStorage = {
       if (!data) {
         return {
           rootPath: "",
+          clientBasePath: "",
           autoSaveEnabled: true,
         };
       }
@@ -91,6 +92,7 @@ export const settingsStorage = {
     } catch {
       return {
         rootPath: "",
+        clientBasePath: "",
         autoSaveEnabled: true,
       };
     }
@@ -108,6 +110,17 @@ export const settingsStorage = {
   setBasePath: (basePath: string) => {
     const settings = settingsStorage.getSettings();
     settings.rootPath = basePath;
+    settingsStorage.saveSettings(settings);
+  },
+
+  getClientBasePath: (): string => {
+    const settings = settingsStorage.getSettings();
+    return settings.clientBasePath;
+  },
+
+  setClientBasePath: (clientBasePath: string) => {
+    const settings = settingsStorage.getSettings();
+    settings.clientBasePath = clientBasePath;
     settingsStorage.saveSettings(settings);
   },
 };
