@@ -221,18 +221,19 @@ export const handleOpenFile: RequestHandler = (req, res) => {
     // Normalize the path (handle mixed separators)
     filePath = path.normalize(filePath);
 
-    // Verify the file/folder exists
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({
-        error: "File or folder not found",
-        details: `O caminho não existe: ${filePath}\n\nVerifique se a pasta foi criada corretamente ao salvar a licitação.`,
-        path: filePath
-      });
-    }
-
-    const isDirectory = fs.statSync(filePath).isDirectory();
     const platform = os.platform();
     let command: string;
+    let isDirectory = true; // Assume it's a directory by default
+
+    // Try to determine if it's a directory (may fail for network paths)
+    try {
+      if (fs.existsSync(filePath)) {
+        isDirectory = fs.statSync(filePath).isDirectory();
+      }
+    } catch (statError) {
+      // If we can't stat the file (e.g., network path not accessible), assume it's a directory
+      console.warn("Could not stat path (may be network path):", filePath);
+    }
 
     if (platform === "win32") {
       // Windows: use explorer
@@ -264,10 +265,21 @@ export const handleOpenFile: RequestHandler = (req, res) => {
       });
     } catch (execError) {
       console.error("Error executing open command:", execError);
-      res.status(500).json({
-        error: "Failed to open file/folder in explorer",
-        details: execError instanceof Error ? execError.message : "Unknown error",
-      });
+      const errorMsg = execError instanceof Error ? execError.message : String(execError);
+
+      // Check if it's a "not found" error
+      if (errorMsg.includes("não existe") || errorMsg.includes("not found") || errorMsg.includes("cannot find")) {
+        res.status(404).json({
+          error: "Path not found",
+          details: `O caminho não foi encontrado: ${filePath}\n\nVerifique se:\n1. O caminho está correto\n2. A pasta foi criada ao salvar a licitação\n3. A unidade de rede está acessível`,
+          path: filePath
+        });
+      } else {
+        res.status(500).json({
+          error: "Failed to open file/folder in explorer",
+          details: errorMsg,
+        });
+      }
     }
   } catch (error) {
     console.error("Error opening file:", error);
