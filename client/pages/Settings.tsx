@@ -9,18 +9,21 @@ import { ChevronLeft, Save } from "lucide-react";
 export default function Settings() {
   const navigate = useNavigate();
   const [rootPath, setRootPath] = useState("");
+  const [clientBasePath, setClientBasePath] = useState("");
   const [autoSave, setAutoSave] = useState(true);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const settings = settingsStorage.getSettings();
     setRootPath(settings.rootPath);
+    setClientBasePath(settings.clientBasePath);
     setAutoSave(settings.autoSaveEnabled);
   }, []);
 
   const handleSave = () => {
     settingsStorage.saveSettings({
       rootPath,
+      clientBasePath,
       autoSaveEnabled: autoSave,
     });
     setSaved(true);
@@ -51,23 +54,40 @@ export default function Settings() {
           <CardHeader>
             <CardTitle>Configuração de Armazenamento Local</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <p className="text-sm text-gray-600">
-              Configure o diretório raiz onde os documentos relacionados a licitações serão salvos em seu computador.
+              Configure os caminhos raiz para organizar documentos de licitações. Use um para o servidor (onde a ferramenta roda) e outro para o cliente (seu computador).
             </p>
+
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-2">
-                Caminho Raiz para Documentos
+                Caminho Raiz do Servidor
               </label>
               <Input
                 type="text"
                 value={rootPath}
                 onChange={(e) => setRootPath(e.target.value)}
+                placeholder="ex: C:\\Bids ou Z:\\1 -DIMAVE E\\01 - EDITAIS E PROPOSTAS"
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Caminho onde a ferramenta está rodando e salvará os documentos (no servidor).
+              </p>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-2">
+                Caminho Raiz do Seu Computador (Cliente)
+              </label>
+              <Input
+                type="text"
+                value={clientBasePath}
+                onChange={(e) => setClientBasePath(e.target.value)}
                 placeholder="ex: Z:\\1 -DIMAVE E\\01 - EDITAIS E PROPOSTAS"
                 className="font-mono text-sm"
               />
               <p className="text-xs text-gray-500 mt-2">
-                Este caminho será usado como diretório base para organizar documentos de licitações por estado, município e ano.
+                Caminho no seu computador para abrir as pastas de licitações. Use este campo se estiver acessando a ferramenta de outro computador.
               </p>
             </div>
           </CardContent>

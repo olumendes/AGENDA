@@ -223,9 +223,6 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
         return;
       }
 
-      // Save the bid first
-      onSave(formData);
-
       // Create folder structure if basePath is configured
       const basePath = settingsStorage.getBasePath();
       if (basePath && basePath.trim()) {
@@ -253,25 +250,24 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
             const errorData = await response.json();
             const errorMsg = errorData.details || errorData.error;
 
-            if (errorMsg.includes("EPERM") || errorMsg.includes("permission")) {
-              console.warn(
-                "⚠️ Aviso: Sem permissão para criar pasta. Verifique se tem acesso de escrita em:",
-                basePath,
-                "\nDetalhes:",
-                errorMsg
-              );
-            } else {
-              console.warn(
-                "Failed to create bid folder:",
-                errorMsg
-              );
-            }
+            setError(
+              `Não foi possível criar a pasta da licitação:\n\n${errorMsg}\n\nVerifique se:\n• O caminho está correto\n• Você tem permissão de escrita\n• A unidade de rede está conectada`
+            );
+            setIsLoading(false);
+            return;
           }
         } catch (folderError) {
-          console.warn("Could not create folder structure:", folderError);
-          // Don't block bid saving if folder creation fails
+          const errorMsg = folderError instanceof Error ? folderError.message : String(folderError);
+          setError(
+            `Erro ao conectar ao servidor para criar pasta:\n\n${errorMsg}`
+          );
+          setIsLoading(false);
+          return;
         }
       }
+
+      // Save the bid after confirming folder was created
+      onSave(formData);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Erro ao salvar licitação"

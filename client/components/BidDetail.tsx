@@ -58,19 +58,33 @@ const ATTACHMENT_FOLDERS: Record<string, string> = {
 
 function buildAttachmentPath(bid: Bid, attachment: BidAttachment): string {
   const settings = settingsStorage.getSettings();
-  const basePath = settings.rootPath;
+  // Use clientBasePath to open files on user's computer
+  let basePath = settings.clientBasePath || settings.rootPath;
 
+  if (!basePath) {
+    return "";
+  }
+
+  // Detect separator used in basePath and use the same
+  const separator = basePath.includes("\\") ? "\\" : "/";
   const folderName = ATTACHMENT_FOLDERS[attachment.type] || ATTACHMENT_FOLDERS["outro"];
-  const filePath = `${basePath}/${bid.year}/${bid.state.toUpperCase()}/${bid.city}/${bid.bidNumber}/Anexos/${folderName}/${attachment.name}`;
+  const filePath = [basePath, bid.year.toString(), bid.state.toUpperCase(), bid.city, bid.bidNumber, "Anexos", folderName, attachment.name].join(separator);
 
   return filePath;
 }
 
 function buildBidFolderPath(bid: Bid): string {
   const settings = settingsStorage.getSettings();
-  const basePath = settings.rootPath;
+  // Use clientBasePath to open folders on user's computer
+  let basePath = settings.clientBasePath || settings.rootPath;
 
-  const folderPath = `${basePath}/${bid.year}/${bid.state.toUpperCase()}/${bid.city}/${bid.bidNumber}`;
+  if (!basePath) {
+    return "";
+  }
+
+  // Detect separator used in basePath and use the same
+  const separator = basePath.includes("\\") ? "\\" : "/";
+  const folderPath = [basePath, bid.year.toString(), bid.state.toUpperCase(), bid.city, bid.bidNumber].join(separator);
 
   return folderPath;
 }
@@ -85,16 +99,32 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
       setIsOpeningFile(true);
       const filePath = buildAttachmentPath(bid, attachment);
 
-      const response = await fetch("/api/bids/open-file", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filePath }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        alert(`Erro ao abrir arquivo: ${error.error}`);
+      if (!filePath) {
+        alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
+        setIsOpeningFile(false);
+        return;
       }
+
+      // Try local server first (http://localhost:8080)
+      try {
+        const response = await fetch("http://localhost:8080/abrir-pasta", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filePath }),
+        });
+
+        if (response.ok) {
+          // Success, file opened on local machine
+          return;
+        }
+      } catch (localError) {
+        // Local server not available, fall back to copying path
+        console.log("Local server not available, copying path instead");
+      }
+
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(filePath);
+      alert(`Caminho copiado para área de transferência:\n\n${filePath}\n\nAbra o Explorador do Windows (Win + E) e cole o caminho na barra de endereço.\n\n📌 Dica: Execute 'python local-server.py' para abrir automaticamente.`);
     } catch (error) {
       console.error("Error opening file:", error);
       alert("Erro ao abrir arquivo");
@@ -108,16 +138,32 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
       setIsOpeningFile(true);
       const folderPath = buildBidFolderPath(bid);
 
-      const response = await fetch("/api/bids/open-file", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filePath: folderPath }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        alert(`Erro ao abrir pasta: ${error.error}`);
+      if (!folderPath) {
+        alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
+        setIsOpeningFile(false);
+        return;
       }
+
+      // Try local server first (http://localhost:8080)
+      try {
+        const response = await fetch("http://localhost:8080/abrir-pasta", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filePath: folderPath }),
+        });
+
+        if (response.ok) {
+          // Success, folder opened on local machine
+          return;
+        }
+      } catch (localError) {
+        // Local server not available, fall back to copying path
+        console.log("Local server not available, copying path instead");
+      }
+
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(folderPath);
+      alert(`Caminho copiado para área de transferência:\n\n${folderPath}\n\nAbra o Explorador do Windows (Win + E) e cole o caminho na barra de endereço.\n\n📌 Dica: Execute 'python local-server.py' para abrir automaticamente.`);
     } catch (error) {
       console.error("Error opening folder:", error);
       alert("Erro ao abrir pasta do processo");

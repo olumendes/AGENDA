@@ -49,6 +49,19 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
           details: `O caminho configurado não existe: ${basePath}`
         });
       }
+
+      // Test write access
+      const testFile = path.join(basePath, ".write-test-" + Date.now());
+      try {
+        fs.writeFileSync(testFile, "test");
+        fs.unlinkSync(testFile);
+      } catch {
+        return res.status(403).json({
+          error: "Permission denied writing to base path",
+          details: `Sem permissão de escrita em: ${basePath}. Verifique se:\n1. A pasta está acessível\n2. Você tem permissão de escrita\n3. A unidade de rede está conectada`,
+          path: basePath
+        });
+      }
     } catch (checkError) {
       return res.status(403).json({
         error: "Permission denied accessing base path",
@@ -56,14 +69,32 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
       });
     }
 
+    // Validate required fields for path construction
+    if (!bid.bidNumber || !bid.year) {
+      return res.status(400).json({
+        error: "Invalid bid data",
+        details: "Número da licitação e ano são obrigatórios para criar a pasta."
+      });
+    }
+
     // Create folder structure: basePath/YEAR/STATE/CITY/BIDNUMBER
-    const bidFolderPath = path.join(
+    // Use state and city only if provided, to avoid extra slashes
+    const pathParts = [
       basePath,
       bid.year.toString(),
-      bid.state.toUpperCase(),
-      bid.city,
-      bid.bidNumber
-    );
+    ];
+
+    if (bid.state && bid.state.trim()) {
+      pathParts.push(bid.state.toUpperCase());
+    }
+
+    if (bid.city && bid.city.trim()) {
+      pathParts.push(bid.city);
+    }
+
+    pathParts.push(bid.bidNumber);
+
+    const bidFolderPath = path.join(...pathParts);
 
     const docsPath = path.join(bidFolderPath, "Docs");
     const anexosPath = path.join(bidFolderPath, "Anexos");
@@ -181,20 +212,28 @@ export const handleSetBasePath: RequestHandler = (req, res) => {
 
 export const handleOpenFile: RequestHandler = (req, res) => {
   try {
-    const { filePath } = req.body;
+    let { filePath } = req.body;
 
     if (!filePath) {
       return res.status(400).json({ error: "File path is required" });
     }
 
-    // Verify the file/folder exists
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: "File or folder not found" });
-    }
+    // Normalize the path (handle mixed separators)
+    filePath = path.normalize(filePath);
 
-    const isDirectory = fs.statSync(filePath).isDirectory();
     const platform = os.platform();
     let command: string;
+    let isDirectory = true; // Assume it's a directory by default
+
+    // Try to determine if it's a directory (may fail for network paths)
+    try {
+      if (fs.existsSync(filePath)) {
+        isDirectory = fs.statSync(filePath).isDirectory();
+      }
+    } catch (statError) {
+      // If we can't stat the file (e.g., network path not accessible), assume it's a directory
+      console.warn("Could not stat path (may be network path):", filePath);
+    }
 
     if (platform === "win32") {
       // Windows: use explorer
@@ -218,17 +257,29 @@ export const handleOpenFile: RequestHandler = (req, res) => {
     }
 
     try {
-      execSync(command, { stdio: "ignore", shell: "/bin/bash" });
+      const shellOption = platform === "win32" ? "cmd.exe" : undefined;
+      execSync(command, { stdio: "ignore", shell: shellOption });
       res.json({
         success: true,
         message: isDirectory ? "Folder opened successfully" : "File opened in explorer successfully",
       });
     } catch (execError) {
       console.error("Error executing open command:", execError);
-      res.status(500).json({
-        error: "Failed to open file/folder in explorer",
-        details: execError instanceof Error ? execError.message : "Unknown error",
-      });
+      const errorMsg = execError instanceof Error ? execError.message : String(execError);
+
+      // Check if it's a "not found" error
+      if (errorMsg.includes("não existe") || errorMsg.includes("not found") || errorMsg.includes("cannot find")) {
+        res.status(404).json({
+          error: "Path not found",
+          details: `O caminho não foi encontrado: ${filePath}\n\nVerifique se:\n1. O caminho está correto\n2. A pasta foi criada ao salvar a licitação\n3. A unidade de rede está acessível`,
+          path: filePath
+        });
+      } else {
+        res.status(500).json({
+          error: "Failed to open file/folder in explorer",
+          details: errorMsg,
+        });
+      }
     }
   } catch (error) {
     console.error("Error opening file:", error);
