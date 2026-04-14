@@ -94,36 +94,82 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isOpeningFile, setIsOpeningFile] = useState(false);
 
-  const handleOpenFile = (attachment: BidAttachment) => {
-    const filePath = buildAttachmentPath(bid, attachment);
+  const handleOpenFile = async (attachment: BidAttachment) => {
+    try {
+      setIsOpeningFile(true);
+      const filePath = buildAttachmentPath(bid, attachment);
 
-    if (!filePath) {
-      alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
-      return;
+      if (!filePath) {
+        alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
+        setIsOpeningFile(false);
+        return;
+      }
+
+      // Try local server first (http://localhost:8080)
+      try {
+        const response = await fetch("http://localhost:8080/abrir-pasta", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filePath }),
+        });
+
+        if (response.ok) {
+          // Success, file opened on local machine
+          return;
+        }
+      } catch (localError) {
+        // Local server not available, fall back to copying path
+        console.log("Local server not available, copying path instead");
+      }
+
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(filePath);
+      alert(`Caminho copiado para área de transferência:\n\n${filePath}\n\nAbra o Explorador do Windows (Win + E) e cole o caminho na barra de endereço.\n\n📌 Dica: Execute 'python local-server.py' para abrir automaticamente.`);
+    } catch (error) {
+      console.error("Error opening file:", error);
+      alert("Erro ao abrir arquivo");
+    } finally {
+      setIsOpeningFile(false);
     }
-
-    // Copy path to clipboard
-    navigator.clipboard.writeText(filePath).then(() => {
-      alert(`Caminho copiado para área de transferência:\n\n${filePath}\n\nAbra o Explorador do Windows (Win + E) e cole o caminho na barra de endereço.`);
-    }).catch(() => {
-      alert(`Caminho: ${filePath}\n\nCopie este caminho e cole no Explorador do Windows (Win + E) na barra de endereço.`);
-    });
   };
 
-  const handleOpenBidFolder = () => {
-    const folderPath = buildBidFolderPath(bid);
+  const handleOpenBidFolder = async () => {
+    try {
+      setIsOpeningFile(true);
+      const folderPath = buildBidFolderPath(bid);
 
-    if (!folderPath) {
-      alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
-      return;
+      if (!folderPath) {
+        alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
+        setIsOpeningFile(false);
+        return;
+      }
+
+      // Try local server first (http://localhost:8080)
+      try {
+        const response = await fetch("http://localhost:8080/abrir-pasta", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filePath: folderPath }),
+        });
+
+        if (response.ok) {
+          // Success, folder opened on local machine
+          return;
+        }
+      } catch (localError) {
+        // Local server not available, fall back to copying path
+        console.log("Local server not available, copying path instead");
+      }
+
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(folderPath);
+      alert(`Caminho copiado para área de transferência:\n\n${folderPath}\n\nAbra o Explorador do Windows (Win + E) e cole o caminho na barra de endereço.\n\n📌 Dica: Execute 'python local-server.py' para abrir automaticamente.`);
+    } catch (error) {
+      console.error("Error opening folder:", error);
+      alert("Erro ao abrir pasta do processo");
+    } finally {
+      setIsOpeningFile(false);
     }
-
-    // Copy path to clipboard
-    navigator.clipboard.writeText(folderPath).then(() => {
-      alert(`Caminho copiado para área de transferência:\n\n${folderPath}\n\nAbra o Explorador do Windows (Win + E) e cole o caminho na barra de endereço.`);
-    }).catch(() => {
-      alert(`Caminho: ${folderPath}\n\nCopie este caminho e cole no Explorador do Windows (Win + E) na barra de endereço.`);
-    });
   };
 
   if (isEditing) {
