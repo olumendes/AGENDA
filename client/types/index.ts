@@ -1,4 +1,4 @@
-export type BidStatus = "cadastrado" | "codificado" | "questionamento" | "suspenso" | "won" | "lost" | "nao_temos";
+export type BidStatus = "cadastrado" | "codificado" | "nao_codificado_flamingo" | "questionamento" | "suspenso" | "won" | "lost" | "nao_temos";
 export type BidType = "chamamento_publico" | "dispensa_eletronica" | "pregao_eletronico" | "pregao_presencial";
 
 export interface BidItem {
@@ -41,7 +41,7 @@ export interface Bid {
 export interface BidAttachment {
   id: string;
   name: string;
-  type: "edital" | "termo" | "atas" | "proposta-inicial" | "proposta-final" | "outro";
+  type: "proposta-inicial" | "proposta-final" | "empenhos" | "atas" | "edital" | "termo" | "resultado" | "outro";
   url: string;
   uploadedAt: Date;
 }

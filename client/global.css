@@ -63,6 +63,8 @@
     --status-cadastrado-light: 210 100% 88%;
     --status-codificado: 270 100% 50%;
     --status-codificado-light: 270 100% 88%;
+    --status-nao_codificado_flamingo: 0 100% 65%;
+    --status-nao_codificado_flamingo-light: 0 100% 88%;
     --status-questionamento: 45 100% 51%;
     --status-questionamento-light: 45 100% 88%;
     --status-suspenso: 39 100% 50%;

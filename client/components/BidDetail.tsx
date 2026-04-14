@@ -11,9 +11,10 @@ import {
   AlertDialogDescription,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Edit2, Trash2, Download, X } from "lucide-react";
+import { Edit2, Trash2, FolderOpen, X } from "lucide-react";
 import { getBidColor, getStatusLabel, formatDateTime, formatBidTitle } from "@/lib/bid-utils";
 import { BidForm } from "./BidForm";
+import { settingsStorage } from "@/lib/storage";
 
 interface BidDetailProps {
   bid: Bid;
@@ -22,9 +23,108 @@ interface BidDetailProps {
   onClose: () => void;
 }
 
+const ATTACHMENT_SECTION_ORDER = [
+  { type: "proposta-inicial" as const, label: "Proposta Inicial" },
+  { type: "proposta-final" as const, label: "Proposta Final" },
+  { type: "empenhos" as const, label: "Empenhos" },
+  { type: "atas" as const, label: "Atas" },
+  { type: "edital" as const, label: "Edital" },
+  { type: "termo" as const, label: "Termo de Referência" },
+  { type: "resultado" as const, label: "Resultado" },
+  { type: "outro" as const, label: "Outros" },
+];
+
+function getAttachmentSections(attachments: BidAttachment[]) {
+  const sections = ATTACHMENT_SECTION_ORDER.map((section) => ({
+    type: section.type,
+    label: section.label,
+    attachments: attachments.filter((att) => att.type === section.type),
+  })).filter((section) => section.attachments.length > 0);
+
+  return sections;
+}
+
+// Map attachment types to folder names (must match server-side mapping)
+const ATTACHMENT_FOLDERS: Record<string, string> = {
+  "proposta-inicial": "Proposta Inicial",
+  "proposta-final": "Proposta Final",
+  "empenhos": "Empenhos",
+  "atas": "Atas",
+  "edital": "Edital",
+  "termo": "Termo de Referência",
+  "resultado": "Resultado",
+  "outro": "Outros",
+};
+
+function buildAttachmentPath(bid: Bid, attachment: BidAttachment): string {
+  const settings = settingsStorage.getSettings();
+  const basePath = settings.rootPath;
+
+  const folderName = ATTACHMENT_FOLDERS[attachment.type] || ATTACHMENT_FOLDERS["outro"];
+  const filePath = `${basePath}/${bid.year}/${bid.state.toUpperCase()}/${bid.city}/${bid.bidNumber}/Anexos/${folderName}/${attachment.name}`;
+
+  return filePath;
+}
+
+function buildBidFolderPath(bid: Bid): string {
+  const settings = settingsStorage.getSettings();
+  const basePath = settings.rootPath;
+
+  const folderPath = `${basePath}/${bid.year}/${bid.state.toUpperCase()}/${bid.city}/${bid.bidNumber}`;
+
+  return folderPath;
+}
+
 export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isOpeningFile, setIsOpeningFile] = useState(false);
+
+  const handleOpenFile = async (attachment: BidAttachment) => {
+    try {
+      setIsOpeningFile(true);
+      const filePath = buildAttachmentPath(bid, attachment);
+
+      const response = await fetch("/api/bids/open-file", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filePath }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Erro ao abrir arquivo: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error opening file:", error);
+      alert("Erro ao abrir arquivo");
+    } finally {
+      setIsOpeningFile(false);
+    }
+  };
+
+  const handleOpenBidFolder = async () => {
+    try {
+      setIsOpeningFile(true);
+      const folderPath = buildBidFolderPath(bid);
+
+      const response = await fetch("/api/bids/open-file", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filePath: folderPath }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Erro ao abrir pasta: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error opening folder:", error);
+      alert("Erro ao abrir pasta do processo");
+    } finally {
+      setIsOpeningFile(false);
+    }
+  };
 
   if (isEditing) {
     return (
@@ -64,6 +164,15 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
               <p className="opacity-90 text-sm">{bid.observation}</p>
             </div>
             <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleOpenBidFolder}
+                disabled={isOpeningFile}
+              >
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Pasta
+              </Button>
               <Button
                 size="sm"
                 variant="secondary"
@@ -308,37 +417,53 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
 
             {/* Attachments */}
             <TabsContent value="attachments">
-              <Card>
-                <CardContent className="pt-6">
-                  {bid.attachments.length > 0 ? (
-                    <div className="space-y-2">
-                      {bid.attachments.map((attachment) => (
-                        <div
-                          key={attachment.id}
-                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
-                        >
-                          <div>
-                            <p className="font-medium text-sm">
-                              {attachment.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {attachment.type} - Enviado em{" "}
-                              {attachment.uploadedAt.toLocaleDateString("pt-BR")}
-                            </p>
-                          </div>
-                          <Button size="sm" variant="outline">
-                            <Download className="h-4 w-4" />
-                          </Button>
+              {bid.attachments.length > 0 ? (
+                <div className="space-y-4">
+                  {getAttachmentSections(bid.attachments).map((section) => (
+                    <Card key={section.type}>
+                      <CardHeader>
+                        <CardTitle className="text-base">{section.label}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {section.attachments.map((attachment) => (
+                            <div
+                              key={attachment.id}
+                              className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                            >
+                              <div>
+                                <p className="font-medium text-sm">
+                                  {attachment.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Enviado em{" "}
+                                  {attachment.uploadedAt.toLocaleDateString("pt-BR")}
+                                </p>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleOpenFile(attachment)}
+                                disabled={isOpeningFile}
+                              >
+                                <FolderOpen className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="pt-6">
                     <p className="text-gray-500 text-sm italic">
                       Nenhum anexo adicionado ainda
                     </p>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             {/* History */}

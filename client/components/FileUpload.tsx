@@ -3,6 +3,13 @@ import { Button } from "@/components/ui/button";
 import { BidAttachment } from "@/types";
 import { Upload, X, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface FileUploadProps {
   attachments: BidAttachment[];
@@ -11,11 +18,13 @@ interface FileUploadProps {
 }
 
 const ATTACHMENT_TYPES = [
-  { id: "edital", label: "Edital" },
-  { id: "termo", label: "Termo de Referência" },
-  { id: "atas", label: "Atas" },
   { id: "proposta-inicial", label: "Proposta Inicial" },
   { id: "proposta-final", label: "Proposta Final" },
+  { id: "empenhos", label: "Empenhos" },
+  { id: "atas", label: "Atas" },
+  { id: "edital", label: "Edital" },
+  { id: "termo", label: "Termo de Referência" },
+  { id: "resultado", label: "Resultado" },
   { id: "outro", label: "Outros" },
 ] as const;
 
@@ -25,6 +34,7 @@ export function FileUpload({
   onRemove,
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedType, setSelectedType] = useState<BidAttachment["type"]>("outro");
 
   const handleFileSelect = (files: FileList | null) => {
     if (!files) return;
@@ -36,7 +46,7 @@ export function FileUpload({
         const attachment: BidAttachment = {
           id: crypto.randomUUID(),
           name: file.name,
-          type: "outro",
+          type: selectedType,
           url: content, // Em um app real, isso seria enviado para um servidor
           uploadedAt: new Date(),
         };
@@ -63,6 +73,25 @@ export function FileUpload({
 
   return (
     <div className="space-y-4">
+      {/* Type Selection */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700">
+          Tipo de Anexo
+        </label>
+        <Select value={selectedType} onValueChange={(value) => setSelectedType(value as BidAttachment["type"])}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {ATTACHMENT_TYPES.map((type) => (
+              <SelectItem key={type.id} value={type.id}>
+                {type.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Upload Area */}
       <div
         className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${

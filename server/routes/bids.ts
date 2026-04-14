@@ -1,6 +1,8 @@
 import { RequestHandler } from "express";
 import fs from "fs";
 import path from "path";
+import { execSync } from "child_process";
+import os from "os";
 
 interface CreateBidFolderRequest {
   basePath: string;
@@ -18,6 +20,18 @@ interface CreateBidFolderRequest {
     }>;
   };
 }
+
+// Map attachment types to folder names
+const ATTACHMENT_FOLDERS: Record<string, string> = {
+  "proposta-inicial": "Proposta Inicial",
+  "proposta-final": "Proposta Final",
+  "empenhos": "Empenhos",
+  "atas": "Atas",
+  "edital": "Edital",
+  "termo": "Termo de Referência",
+  "resultado": "Resultado",
+  "outro": "Outros",
+};
 
 export const handleCreateBidFolder: RequestHandler = (req, res) => {
   try {
@@ -37,11 +51,11 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
     );
 
     const docsPath = path.join(bidFolderPath, "Docs");
-    const proposalPath = path.join(bidFolderPath, "Proposta");
+    const anexosPath = path.join(bidFolderPath, "Anexos");
 
     // Create directories
     fs.mkdirSync(docsPath, { recursive: true });
-    fs.mkdirSync(proposalPath, { recursive: true });
+    fs.mkdirSync(anexosPath, { recursive: true });
 
     // Save notes to a text file if provided
     if (bid.notes && bid.notes.trim()) {
@@ -55,24 +69,38 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
       fs.appendFileSync(notesPath, bid.notes, "utf-8");
     }
 
-    // Log attachment info (actual file content would need to be handled differently)
+    // Save attachment files
+    const savedAttachments: Array<{ name: string; type: string; path: string }> = [];
     if (bid.attachments && bid.attachments.length > 0) {
-      const attachmentsLog = bid.attachments
-        .map((att) => `- ${att.name} (${att.type})`)
-        .join("\n");
-      const attachmentsPath = path.join(docsPath, "Anexos_Info.txt");
-      fs.writeFileSync(
-        attachmentsPath,
-        `Anexos da Licitação ${bid.bidNumber}\n\n${attachmentsLog}`,
-        "utf-8"
-      );
+      for (const att of bid.attachments) {
+        try {
+          // Get folder name for this attachment type
+          const folderName = ATTACHMENT_FOLDERS[att.type] || ATTACHMENT_FOLDERS["outro"];
+          const typePath = path.join(anexosPath, folderName);
+          fs.mkdirSync(typePath, { recursive: true });
+
+          // Decode base64 and save file
+          if (att.url.startsWith("data:")) {
+            const base64Data = att.url.split(",")[1];
+            if (base64Data) {
+              const filePath = path.join(typePath, att.name);
+              fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
+              savedAttachments.push({ name: att.name, type: att.type, path: filePath });
+            }
+          }
+        } catch (attError) {
+          console.error(`Error saving attachment ${att.name}:`, attError);
+          // Continue with other attachments
+        }
+      }
     }
 
     res.json({
       success: true,
       bidFolderPath,
       docsPath,
-      proposalPath,
+      anexosPath,
+      attachmentsSaved: savedAttachments.length,
       message: "Pasta da licitação criada com sucesso",
     });
   } catch (error) {
@@ -112,6 +140,66 @@ export const handleSetBasePath: RequestHandler = (req, res) => {
     console.error("Error setting base path:", error);
     res.status(500).json({
       error: "Failed to set base path",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+export const handleOpenFile: RequestHandler = (req, res) => {
+  try {
+    const { filePath } = req.body;
+
+    if (!filePath) {
+      return res.status(400).json({ error: "File path is required" });
+    }
+
+    // Verify the file/folder exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: "File or folder not found" });
+    }
+
+    const isDirectory = fs.statSync(filePath).isDirectory();
+    const platform = os.platform();
+    let command: string;
+
+    if (platform === "win32") {
+      // Windows: use explorer
+      if (isDirectory) {
+        // For folders, just open the folder
+        command = `explorer "${filePath}"`;
+      } else {
+        // For files, select them in explorer
+        command = `explorer /select, "${filePath}"`;
+      }
+    } else if (platform === "darwin") {
+      // macOS: use open -R to reveal in Finder
+      command = `open -R "${filePath}"`;
+    } else {
+      // Linux: use nautilus or xdg-open
+      if (isDirectory) {
+        command = `nautilus "${filePath}" 2>/dev/null || xdg-open "${filePath}"`;
+      } else {
+        command = `nautilus "$(dirname "${filePath}")" 2>/dev/null || xdg-open "$(dirname "${filePath}")"`;
+      }
+    }
+
+    try {
+      execSync(command, { stdio: "ignore", shell: "/bin/bash" });
+      res.json({
+        success: true,
+        message: isDirectory ? "Folder opened successfully" : "File opened in explorer successfully",
+      });
+    } catch (execError) {
+      console.error("Error executing open command:", execError);
+      res.status(500).json({
+        error: "Failed to open file/folder in explorer",
+        details: execError instanceof Error ? execError.message : "Unknown error",
+      });
+    }
+  } catch (error) {
+    console.error("Error opening file:", error);
+    res.status(500).json({
+      error: "Failed to open file/folder",
       details: error instanceof Error ? error.message : "Unknown error",
     });
   }
