@@ -96,30 +96,40 @@ class APIHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         """Handle POST requests"""
         parsed_path = urlparse(self.path).path
-        
+
+        # Log incoming request
+        logger.info(f"POST {parsed_path} - Content-Length: {self.headers.get('Content-Length', 0)}")
+
         try:
             # Read request body
             content_length = int(self.headers.get('Content-Length', 0))
             body = self.rfile.read(content_length) if content_length > 0 else b''
             data = json.loads(body.decode('utf-8')) if body else {}
-            
+
+            logger.debug(f"Request data: {str(data)[:200]}")  # Log first 200 chars of data
+
             # Route handling
             if parsed_path == '/abrir-pasta':
+                logger.info("Handling /abrir-pasta request")
                 self.handle_abrir_pasta(data)
             elif parsed_path == '/api/bids/create-folder':
+                logger.info("Handling /api/bids/create-folder request")
                 self.handle_create_folder(data)
             elif parsed_path == '/api/bids/set-base-path':
+                logger.info("Handling /api/bids/set-base-path request")
                 self.handle_set_base_path(data)
             elif parsed_path == '/api/bids/open-file':
+                logger.info("Handling /api/bids/open-file request")
                 self.handle_open_file(data)
             else:
+                logger.warning(f"Unknown endpoint: {parsed_path}")
                 self.send_json_response({'error': f'Endpoint not found: {parsed_path}'}, 404)
-        
+
         except json.JSONDecodeError as e:
             logger.error(f"JSON decode error: {str(e)}")
             self.send_json_response({'error': 'Invalid JSON'}, 400)
         except Exception as e:
-            logger.error(f"Server error: {str(e)}")
+            logger.error(f"Server error: {str(e)}", exc_info=True)
             self.send_json_response({'error': f'Server error: {str(e)}'}, 500)
     
     def handle_abrir_pasta(self, data):
@@ -165,7 +175,9 @@ class APIHandler(http.server.SimpleHTTPRequestHandler):
         """Handle POST /api/bids/create-folder - Creates bid folder structure"""
         base_path = data.get('basePath', '')
         bid = data.get('bid', {})
-        
+
+        logger.info(f"handle_create_folder called with basePath={base_path}, bidNumber={bid.get('bidNumber')}")
+
         if not base_path or not bid:
             logger.warning("Missing required fields in create-folder request")
             self.send_json_response({'error': 'Missing required fields'}, 400)
@@ -173,7 +185,12 @@ class APIHandler(http.server.SimpleHTTPRequestHandler):
         
         try:
             # Verify basePath exists and is writable
-            if not os.path.exists(base_path):
+            logger.info(f"Checking if base path exists: {base_path}")
+            base_path_exists = os.path.exists(base_path)
+            logger.info(f"Base path exists: {base_path_exists}")
+
+            if not base_path_exists:
+                logger.error(f"Base path does not exist: {base_path}")
                 return self.send_json_response({
                     'error': 'Base path does not exist',
                     'details': f'O caminho configurado não existe: {base_path}'
