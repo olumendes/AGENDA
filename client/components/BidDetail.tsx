@@ -94,62 +94,36 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isOpeningFile, setIsOpeningFile] = useState(false);
 
-  const handleOpenFile = async (attachment: BidAttachment) => {
-    try {
-      setIsOpeningFile(true);
-      const filePath = buildAttachmentPath(bid, attachment);
+  const handleOpenFile = (attachment: BidAttachment) => {
+    const filePath = buildAttachmentPath(bid, attachment);
 
-      if (!filePath) {
-        alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
-        setIsOpeningFile(false);
-        return;
-      }
-
-      const response = await fetch("/api/bids/open-file", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filePath }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        alert(`Erro ao abrir arquivo: ${error.details || error.error}`);
-      }
-    } catch (error) {
-      console.error("Error opening file:", error);
-      alert("Erro ao abrir arquivo");
-    } finally {
-      setIsOpeningFile(false);
+    if (!filePath) {
+      alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
+      return;
     }
+
+    // Copy path to clipboard
+    navigator.clipboard.writeText(filePath).then(() => {
+      alert(`Caminho copiado para área de transferência:\n\n${filePath}\n\nAbra o Explorador do Windows (Win + E) e cole o caminho na barra de endereço.`);
+    }).catch(() => {
+      alert(`Caminho: ${filePath}\n\nCopie este caminho e cole no Explorador do Windows (Win + E) na barra de endereço.`);
+    });
   };
 
-  const handleOpenBidFolder = async () => {
-    try {
-      setIsOpeningFile(true);
-      const folderPath = buildBidFolderPath(bid);
+  const handleOpenBidFolder = () => {
+    const folderPath = buildBidFolderPath(bid);
 
-      if (!folderPath) {
-        alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
-        setIsOpeningFile(false);
-        return;
-      }
-
-      const response = await fetch("/api/bids/open-file", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filePath: folderPath }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        alert(`Erro ao abrir pasta: ${error.details || error.error}`);
-      }
-    } catch (error) {
-      console.error("Error opening folder:", error);
-      alert("Erro ao abrir pasta do processo");
-    } finally {
-      setIsOpeningFile(false);
+    if (!folderPath) {
+      alert("Caminho do cliente não configurado. Configure em Configurações > Caminho Raiz do Seu Computador (Cliente)");
+      return;
     }
+
+    // Copy path to clipboard
+    navigator.clipboard.writeText(folderPath).then(() => {
+      alert(`Caminho copiado para área de transferência:\n\n${folderPath}\n\nAbra o Explorador do Windows (Win + E) e cole o caminho na barra de endereço.`);
+    }).catch(() => {
+      alert(`Caminho: ${folderPath}\n\nCopie este caminho e cole no Explorador do Windows (Win + E) na barra de endereço.`);
+    });
   };
 
   if (isEditing) {
