@@ -99,10 +99,25 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
     const docsPath = path.join(bidFolderPath, "Docs");
     const anexosPath = path.join(bidFolderPath, "Anexos");
 
-    // Create directories with better error handling
+    // Create directories only if they don't exist
     try {
-      fs.mkdirSync(docsPath, { recursive: true });
-      fs.mkdirSync(anexosPath, { recursive: true });
+      // Only create folders if they don't already exist
+      const folderStatuses = {
+        bidFolder: fs.existsSync(bidFolderPath),
+        docs: fs.existsSync(docsPath),
+        anexos: fs.existsSync(anexosPath),
+      };
+
+      // Create only missing directories
+      if (!folderStatuses.bidFolder) {
+        fs.mkdirSync(bidFolderPath, { recursive: true });
+      }
+      if (!folderStatuses.docs) {
+        fs.mkdirSync(docsPath, { recursive: true });
+      }
+      if (!folderStatuses.anexos) {
+        fs.mkdirSync(anexosPath, { recursive: true });
+      }
     } catch (mkdirError) {
       const error = mkdirError instanceof Error ? mkdirError : new Error(String(mkdirError));
       if (error.message.includes("EPERM")) {
@@ -128,22 +143,44 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
     }
 
     // Save attachment files
-    const savedAttachments: Array<{ name: string; type: string; path: string }> = [];
+    const savedAttachments: Array<{ name: string; type: string; path: string; isNew: boolean }> = [];
     if (bid.attachments && bid.attachments.length > 0) {
       for (const att of bid.attachments) {
         try {
           // Get folder name for this attachment type
           const folderName = ATTACHMENT_FOLDERS[att.type] || ATTACHMENT_FOLDERS["outro"];
           const typePath = path.join(anexosPath, folderName);
-          fs.mkdirSync(typePath, { recursive: true });
 
-          // Decode base64 and save file
+          // Create type folder only if it doesn't exist
+          if (!fs.existsSync(typePath)) {
+            fs.mkdirSync(typePath, { recursive: true });
+          }
+
+          // Decode base64 and save file only if it doesn't already exist
           if (att.url.startsWith("data:")) {
             const base64Data = att.url.split(",")[1];
             if (base64Data) {
               const filePath = path.join(typePath, att.name);
-              fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
-              savedAttachments.push({ name: att.name, type: att.type, path: filePath });
+              const fileExists = fs.existsSync(filePath);
+
+              // Only write file if it doesn't exist
+              if (!fileExists) {
+                fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
+                savedAttachments.push({
+                  name: att.name,
+                  type: att.type,
+                  path: filePath,
+                  isNew: true
+                });
+              } else {
+                // File already exists, just record it
+                savedAttachments.push({
+                  name: att.name,
+                  type: att.type,
+                  path: filePath,
+                  isNew: false
+                });
+              }
             }
           }
         } catch (attError) {
@@ -153,13 +190,17 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
       }
     }
 
+    const newAttachments = savedAttachments.filter(a => a.isNew).length;
+    const existingAttachments = savedAttachments.filter(a => !a.isNew).length;
+
     res.json({
       success: true,
       bidFolderPath,
       docsPath,
       anexosPath,
-      attachmentsSaved: savedAttachments.length,
-      message: "Pasta da licitação criada com sucesso",
+      attachmentsSaved: newAttachments,
+      attachmentsSkipped: existingAttachments,
+      message: `Pasta da licitação processada com sucesso${newAttachments > 0 ? ` (${newAttachments} novos anexos salvos)` : ''}${existingAttachments > 0 ? ` (${existingAttachments} anexos já existentes)` : ''}`,
     });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
