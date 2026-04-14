@@ -205,7 +205,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                             key={item.id}
                             className="text-sm p-2 bg-gray-50 rounded text-gray-700"
                           >
-                            {item.description}
+                            {item.number} - {item.code}
                           </li>
                         ))}
                       </ul>
@@ -227,7 +227,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                             key={item.id}
                             className="text-sm p-2 bg-status-won-light rounded text-gray-700"
                           >
-                            {item.description}
+                            {item.number} - {item.code}
                           </li>
                         ))}
                       </ul>
@@ -249,7 +249,7 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                             key={item.id}
                             className="text-sm p-2 bg-status-lost-light rounded text-gray-700"
                           >
-                            {item.description}
+                            {item.number} - {item.code}
                           </li>
                         ))}
                       </ul>
