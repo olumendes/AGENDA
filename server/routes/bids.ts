@@ -41,6 +41,21 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    // Verify basePath exists and is writable
+    try {
+      if (!fs.existsSync(basePath)) {
+        return res.status(400).json({
+          error: "Base path does not exist",
+          details: `O caminho configurado não existe: ${basePath}`
+        });
+      }
+    } catch (checkError) {
+      return res.status(403).json({
+        error: "Permission denied accessing base path",
+        details: `Sem permissão para acessar: ${basePath}`
+      });
+    }
+
     // Create folder structure: basePath/YEAR/STATE/CITY/BIDNUMBER
     const bidFolderPath = path.join(
       basePath,
@@ -53,9 +68,21 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
     const docsPath = path.join(bidFolderPath, "Docs");
     const anexosPath = path.join(bidFolderPath, "Anexos");
 
-    // Create directories
-    fs.mkdirSync(docsPath, { recursive: true });
-    fs.mkdirSync(anexosPath, { recursive: true });
+    // Create directories with better error handling
+    try {
+      fs.mkdirSync(docsPath, { recursive: true });
+      fs.mkdirSync(anexosPath, { recursive: true });
+    } catch (mkdirError) {
+      const error = mkdirError instanceof Error ? mkdirError : new Error(String(mkdirError));
+      if (error.message.includes("EPERM")) {
+        return res.status(403).json({
+          error: "Permission denied creating folders",
+          details: `Sem permissão de escrita em: ${basePath}. Verifique se a pasta está acessível e se você tem permissão de escrita.`,
+          path: bidFolderPath
+        });
+      }
+      throw mkdirError;
+    }
 
     // Save notes to a text file if provided
     if (bid.notes && bid.notes.trim()) {
@@ -104,10 +131,17 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
       message: "Pasta da licitação criada com sucesso",
     });
   } catch (error) {
-    console.error("Error creating bid folder:", error);
-    res.status(500).json({
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error("Error creating bid folder:", errorMsg);
+
+    // Return appropriate status based on error type
+    const statusCode = errorMsg.includes("EPERM") || errorMsg.includes("permission")
+      ? 403
+      : 500;
+
+    res.status(statusCode).json({
       error: "Failed to create bid folder",
-      details: error instanceof Error ? error.message : "Unknown error",
+      details: errorMsg,
     });
   }
 };

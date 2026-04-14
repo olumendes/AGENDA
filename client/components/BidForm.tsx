@@ -251,10 +251,21 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
 
           if (!response.ok) {
             const errorData = await response.json();
-            console.warn(
-              "Failed to create bid folder:",
-              errorData.details || errorData.error
-            );
+            const errorMsg = errorData.details || errorData.error;
+
+            if (errorMsg.includes("EPERM") || errorMsg.includes("permission")) {
+              console.warn(
+                "⚠️ Aviso: Sem permissão para criar pasta. Verifique se tem acesso de escrita em:",
+                basePath,
+                "\nDetalhes:",
+                errorMsg
+              );
+            } else {
+              console.warn(
+                "Failed to create bid folder:",
+                errorMsg
+              );
+            }
           }
         } catch (folderError) {
           console.warn("Could not create folder structure:", folderError);
