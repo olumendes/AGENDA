@@ -247,8 +247,19 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
-            const errorMsg = errorData.details || errorData.error;
+            let errorMsg = "Erro desconhecido";
+            try {
+              const errorData = await response.json();
+              errorMsg = errorData.details || errorData.error || errorMsg;
+            } catch (parseError) {
+              // Se não conseguir fazer parse do JSON, tenta pegar o texto
+              try {
+                const text = await response.text();
+                errorMsg = text || `HTTP ${response.status}: ${response.statusText}`;
+              } catch {
+                errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+              }
+            }
 
             setError(
               `Não foi possível criar a pasta da licitação:\n\n${errorMsg}\n\nVerifique se:\n• O caminho está correto\n• Você tem permissão de escrita\n• A unidade de rede está conectada`
