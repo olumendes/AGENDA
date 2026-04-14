@@ -36,7 +36,21 @@ class OpenFileHandler(http.server.SimpleHTTPRequestHandler):
     
     def do_POST(self):
         """Handle POST requests to open files/folders"""
-        
+
+        # Parse the path
+        parsed_path = urlparse(self.path).path
+
+        # Check if this is the correct endpoint
+        if parsed_path != '/abrir-pasta':
+            self.send_response(404)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'error': f'Endpoint not found: {parsed_path}'
+            }).encode())
+            return
+
         # Add CORS headers
         self.send_response(200)
         self.send_header("Access-Control-Allow-Origin", "*")
