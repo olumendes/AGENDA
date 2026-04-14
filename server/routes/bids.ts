@@ -212,11 +212,14 @@ export const handleSetBasePath: RequestHandler = (req, res) => {
 
 export const handleOpenFile: RequestHandler = (req, res) => {
   try {
-    const { filePath } = req.body;
+    let { filePath } = req.body;
 
     if (!filePath) {
       return res.status(400).json({ error: "File path is required" });
     }
+
+    // Normalize the path (handle mixed separators)
+    filePath = path.normalize(filePath);
 
     // Verify the file/folder exists
     if (!fs.existsSync(filePath)) {

@@ -59,14 +59,16 @@ const ATTACHMENT_FOLDERS: Record<string, string> = {
 function buildAttachmentPath(bid: Bid, attachment: BidAttachment): string {
   const settings = settingsStorage.getSettings();
   // Use clientBasePath to open files on user's computer
-  const basePath = settings.clientBasePath || settings.rootPath;
+  let basePath = settings.clientBasePath || settings.rootPath;
 
   if (!basePath) {
     return "";
   }
 
+  // Detect separator used in basePath and use the same
+  const separator = basePath.includes("\\") ? "\\" : "/";
   const folderName = ATTACHMENT_FOLDERS[attachment.type] || ATTACHMENT_FOLDERS["outro"];
-  const filePath = `${basePath}/${bid.year}/${bid.state.toUpperCase()}/${bid.city}/${bid.bidNumber}/Anexos/${folderName}/${attachment.name}`;
+  const filePath = [basePath, bid.year.toString(), bid.state.toUpperCase(), bid.city, bid.bidNumber, "Anexos", folderName, attachment.name].join(separator);
 
   return filePath;
 }
@@ -74,13 +76,15 @@ function buildAttachmentPath(bid: Bid, attachment: BidAttachment): string {
 function buildBidFolderPath(bid: Bid): string {
   const settings = settingsStorage.getSettings();
   // Use clientBasePath to open folders on user's computer
-  const basePath = settings.clientBasePath || settings.rootPath;
+  let basePath = settings.clientBasePath || settings.rootPath;
 
   if (!basePath) {
     return "";
   }
 
-  const folderPath = `${basePath}/${bid.year}/${bid.state.toUpperCase()}/${bid.city}/${bid.bidNumber}`;
+  // Detect separator used in basePath and use the same
+  const separator = basePath.includes("\\") ? "\\" : "/";
+  const folderPath = [basePath, bid.year.toString(), bid.state.toUpperCase(), bid.city, bid.bidNumber].join(separator);
 
   return folderPath;
 }
