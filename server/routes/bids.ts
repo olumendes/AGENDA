@@ -35,9 +35,13 @@ const ATTACHMENT_FOLDERS: Record<string, string> = {
 
 export const handleCreateBidFolder: RequestHandler = (req, res) => {
   try {
+    console.log("[handleCreateBidFolder] Request received");
     const { basePath, bid } = req.body as CreateBidFolderRequest;
 
+    console.log(`[handleCreateBidFolder] basePath: ${basePath}, bidNumber: ${bid?.bidNumber}`);
+
     if (!basePath || !bid) {
+      console.error("[handleCreateBidFolder] Missing required fields");
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -99,10 +103,30 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
     const docsPath = path.join(bidFolderPath, "Docs");
     const anexosPath = path.join(bidFolderPath, "Anexos");
 
-    // Create directories with better error handling
+    // Create directories only if they don't exist
     try {
-      fs.mkdirSync(docsPath, { recursive: true });
-      fs.mkdirSync(anexosPath, { recursive: true });
+      // Only create folders if they don't already exist
+      const folderStatuses = {
+        bidFolder: fs.existsSync(bidFolderPath),
+        docs: fs.existsSync(docsPath),
+        anexos: fs.existsSync(anexosPath),
+      };
+
+      console.log(`[handleCreateBidFolder] Folder statuses:`, folderStatuses);
+
+      // Create only missing directories
+      if (!folderStatuses.bidFolder) {
+        console.log(`[handleCreateBidFolder] Creating bid folder: ${bidFolderPath}`);
+        fs.mkdirSync(bidFolderPath, { recursive: true });
+      }
+      if (!folderStatuses.docs) {
+        console.log(`[handleCreateBidFolder] Creating docs folder: ${docsPath}`);
+        fs.mkdirSync(docsPath, { recursive: true });
+      }
+      if (!folderStatuses.anexos) {
+        console.log(`[handleCreateBidFolder] Creating anexos folder: ${anexosPath}`);
+        fs.mkdirSync(anexosPath, { recursive: true });
+      }
     } catch (mkdirError) {
       const error = mkdirError instanceof Error ? mkdirError : new Error(String(mkdirError));
       if (error.message.includes("EPERM")) {
@@ -128,42 +152,78 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
     }
 
     // Save attachment files
-    const savedAttachments: Array<{ name: string; type: string; path: string }> = [];
+    const savedAttachments: Array<{ name: string; type: string; path: string; isNew: boolean }> = [];
     if (bid.attachments && bid.attachments.length > 0) {
+      console.log(`[handleCreateBidFolder] Processing ${bid.attachments.length} attachments`);
       for (const att of bid.attachments) {
         try {
           // Get folder name for this attachment type
           const folderName = ATTACHMENT_FOLDERS[att.type] || ATTACHMENT_FOLDERS["outro"];
           const typePath = path.join(anexosPath, folderName);
-          fs.mkdirSync(typePath, { recursive: true });
 
-          // Decode base64 and save file
+          console.log(`[handleCreateBidFolder] Processing attachment: ${att.name} (type: ${att.type})`);
+
+          // Create type folder only if it doesn't exist
+          if (!fs.existsSync(typePath)) {
+            console.log(`[handleCreateBidFolder] Creating type folder: ${typePath}`);
+            fs.mkdirSync(typePath, { recursive: true });
+          }
+
+          // Decode base64 and save file only if it doesn't already exist
           if (att.url.startsWith("data:")) {
             const base64Data = att.url.split(",")[1];
             if (base64Data) {
               const filePath = path.join(typePath, att.name);
-              fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
-              savedAttachments.push({ name: att.name, type: att.type, path: filePath });
+              const fileExists = fs.existsSync(filePath);
+
+              // Only write file if it doesn't exist
+              if (!fileExists) {
+                console.log(`[handleCreateBidFolder] Saving new file: ${filePath}`);
+                fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
+                savedAttachments.push({
+                  name: att.name,
+                  type: att.type,
+                  path: filePath,
+                  isNew: true
+                });
+              } else {
+                // File already exists, just record it
+                console.log(`[handleCreateBidFolder] File already exists, skipping: ${filePath}`);
+                savedAttachments.push({
+                  name: att.name,
+                  type: att.type,
+                  path: filePath,
+                  isNew: false
+                });
+              }
             }
           }
         } catch (attError) {
-          console.error(`Error saving attachment ${att.name}:`, attError);
+          console.error(`[handleCreateBidFolder] Error saving attachment ${att.name}:`, attError);
           // Continue with other attachments
         }
       }
     }
+
+    const newAttachments = savedAttachments.filter(a => a.isNew).length;
+    const existingAttachments = savedAttachments.filter(a => !a.isNew).length;
+
+    const responseMessage = `Pasta da licitação processada com sucesso${newAttachments > 0 ? ` (${newAttachments} novos anexos salvos)` : ''}${existingAttachments > 0 ? ` (${existingAttachments} anexos já existentes)` : ''}`;
+    console.log(`[handleCreateBidFolder] Success:`, { newAttachments, existingAttachments, message: responseMessage });
 
     res.json({
       success: true,
       bidFolderPath,
       docsPath,
       anexosPath,
-      attachmentsSaved: savedAttachments.length,
-      message: "Pasta da licitação criada com sucesso",
+      attachmentsSaved: newAttachments,
+      attachmentsSkipped: existingAttachments,
+      message: responseMessage,
     });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error("Error creating bid folder:", errorMsg);
+    const stack = error instanceof Error ? error.stack : "";
+    console.error("[handleCreateBidFolder] Error:", { message: errorMsg, stack });
 
     // Return appropriate status based on error type
     const statusCode = errorMsg.includes("EPERM") || errorMsg.includes("permission")
