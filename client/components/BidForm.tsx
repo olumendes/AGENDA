@@ -86,50 +86,97 @@ function calculateStatusFromItems(items: {
 }
 
 export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
-  const [formData, setFormData] = useState<Bid>(
-    bid || {
-      id: crypto.randomUUID(),
-      title: "",
-      bidType: "pregao_eletronico",
-      bidNumber: "",
-      products: "",
-      observation: "",
-      disputeDate: new Date(),
-      disputeTime: "09:00",
-      portal: "",
-      codigoEffecti: "",
-      uasg: "",
-      codigoBancoDoBrasil: "",
-      status: "cadastrado",
-      year: new Date().getFullYear(),
-      state: "",
-      city: "",
-      notes: "",
-      items: {
-        itemsRegistered: [],
-        itemsWon: [],
-        itemsLost: [],
-      },
-      attachments: [],
-      processHistory: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+  const [formData, setFormData] = useState<Bid>(() => {
+    try {
+      if (bid) {
+        return bid;
+      }
+
+      return {
+        id: crypto.randomUUID(),
+        title: "",
+        bidType: "pregao_eletronico",
+        bidNumber: "",
+        products: "",
+        observation: "",
+        disputeDate: new Date(),
+        disputeTime: "09:00",
+        portal: "",
+        codigoEffecti: "",
+        uasg: "",
+        codigoBancoDoBrasil: "",
+        status: "cadastrado",
+        year: new Date().getFullYear(),
+        state: "",
+        city: "",
+        notes: "",
+        items: {
+          itemsRegistered: [],
+          itemsWon: [],
+          itemsLost: [],
+        },
+        attachments: [],
+        processHistory: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    } catch (error) {
+      console.error("Error initializing BidForm:", error);
+      return {
+        id: "",
+        title: "",
+        bidType: "pregao_eletronico",
+        bidNumber: "",
+        products: "",
+        observation: "",
+        disputeDate: new Date(),
+        disputeTime: "09:00",
+        portal: "",
+        codigoEffecti: "",
+        uasg: "",
+        codigoBancoDoBrasil: "",
+        status: "cadastrado",
+        year: new Date().getFullYear(),
+        state: "",
+        city: "",
+        notes: "",
+        items: {
+          itemsRegistered: [],
+          itemsWon: [],
+          itemsLost: [],
+        },
+        attachments: [],
+        processHistory: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
     }
-  );
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Get suggestions from bid history
   const suggestions = useMemo(() => {
-    const allBids = bidStorage.getBids();
+    try {
+      const allBids = bidStorage.getBids();
 
-    return {
-      bidNumbers: Array.from(new Set(allBids.map(b => b.bidNumber).filter(Boolean))).sort(),
-      portals: Array.from(new Set(allBids.map(b => b.portal).filter(Boolean))).sort(),
-      products: Array.from(new Set(allBids.map(b => b.products).filter(Boolean))).sort(),
-      cities: Array.from(new Set(allBids.map(b => b.city).filter(Boolean))).sort(),
-      years: Array.from(new Set(allBids.map(b => b.year.toString()).filter(Boolean))).sort().reverse(),
-    };
+      return {
+        bidNumbers: Array.from(new Set(allBids.map(b => b.bidNumber).filter(Boolean))).sort(),
+        portals: Array.from(new Set(allBids.map(b => b.portal).filter(Boolean))).sort(),
+        products: Array.from(new Set(allBids.map(b => b.products).filter(Boolean))).sort(),
+        cities: Array.from(new Set(allBids.map(b => b.city).filter(Boolean))).sort(),
+        years: Array.from(new Set(allBids.map(b => b.year.toString()).filter(Boolean))).sort().reverse(),
+      };
+    } catch (error) {
+      console.error("Error loading suggestions:", error);
+      return {
+        bidNumbers: [],
+        portals: [],
+        products: [],
+        cities: [],
+        years: [],
+      };
+    }
   }, []);
 
 
