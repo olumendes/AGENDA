@@ -111,7 +111,7 @@ export function WeekView({
                         key={bid.id}
                         className="text-xs flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity py-0.5"
                         onClick={() => onSelectBid(bid)}
-                        title={formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}
+                        title={formatBidTitle(bid.bidType, bid.bidNumber, bid.products, bid.portal)}
                       >
                         <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getBidColor(bid.status).bg}`} />
                         <div className="flex-1 min-w-0">

@@ -91,6 +91,7 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
       title: "",
       bidType: "pregao_eletronico",
       bidNumber: "",
+      products: "",
       observation: "",
       disputeDate: new Date(),
       disputeTime: "09:00",
@@ -226,6 +227,16 @@ export function BidForm({ bid, onSave, onCancel }: BidFormProps) {
                 className="mt-1"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700">Produtos</label>
+            <Input
+              value={formData.products}
+              onChange={(e) => handleChange("products", e.target.value)}
+              placeholder="ex: Alimentos, Equipamentos, Peças"
+              className="mt-1"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

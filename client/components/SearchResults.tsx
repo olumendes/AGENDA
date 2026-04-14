@@ -43,7 +43,7 @@ export function SearchResults({ bids, onSelectBid, onNewBid }: SearchResultsProp
                   </span>
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-1">
-                  {formatBidTitle(bid.bidType, bid.bidNumber, bid.portal)}
+                  {formatBidTitle(bid.bidType, bid.bidNumber, bid.products, bid.portal)}
                 </h3>
                 <p className="text-sm text-gray-600 mb-2">
                   {bid.city}, {bid.state}

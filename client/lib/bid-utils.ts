@@ -86,6 +86,10 @@ export function getBidTypeAbbreviation(bidType: BidType): string {
   return abbreviations[bidType];
 }
 
-export function formatBidTitle(bidType: BidType, bidNumber: string, portal: string): string {
-  return `${getBidTypeLabel(bidType)} Nº ${bidNumber} (${portal})`;
+export function formatBidTitle(bidType: BidType, bidNumber: string, products: string, portal: string): string {
+  const title = `${getBidTypeLabel(bidType)} Nº ${bidNumber}`;
+  if (products) {
+    return `${title} - ${products} (${portal})`;
+  }
+  return `${title} (${portal})`;
 }
