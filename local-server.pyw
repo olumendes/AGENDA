@@ -3,6 +3,7 @@
 Servidor Local para abrir pastas e arquivos no Windows - com Bandeja do Sistema
 
 Este script roda em background na bandeja do Windows (sem exibir console).
+Fornece endpoints API para o React app gerenciar licitações.
 
 Requisitos:
   - Python 3.x
@@ -24,6 +25,7 @@ import subprocess
 import platform
 import threading
 import logging
+import base64
 from urllib.parse import urlparse, parse_qs
 from pathlib import Path
 from datetime import datetime
@@ -59,9 +61,21 @@ server = None
 server_thread = None
 is_running = False
 
+# Mapeamento de tipos de anexo para nomes de pastas
+ATTACHMENT_FOLDERS = {
+    "proposta-inicial": "Proposta Inicial",
+    "proposta-final": "Proposta Final",
+    "empenhos": "Empenhos",
+    "atas": "Atas",
+    "edital": "Edital",
+    "termo": "Termo de Referência",
+    "resultado": "Resultado",
+    "outro": "Outros",
+}
 
-class OpenFileHandler(http.server.SimpleHTTPRequestHandler):
-    """Handler para requisições de abrir pastas/arquivos"""
+
+class APIHandler(http.server.SimpleHTTPRequestHandler):
+    """Handler para requisições HTTP/API"""
     
     def do_OPTIONS(self):
         """Handle CORS preflight requests"""
@@ -71,72 +85,303 @@ class OpenFileHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
     
-    def do_POST(self):
-        """Handle POST requests to open files/folders"""
-        
-        # Add CORS headers
-        self.send_response(200)
+    def send_json_response(self, data, status=200):
+        """Enviar resposta JSON com headers CORS"""
+        self.send_response(status)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        
+        self.wfile.write(json.dumps(data).encode())
+    
+    def do_POST(self):
+        """Handle POST requests"""
+        parsed_path = urlparse(self.path).path
+
+        # Log incoming request
+        logger.info(f"POST {parsed_path} - Content-Length: {self.headers.get('Content-Length', 0)}")
+
         try:
             # Read request body
             content_length = int(self.headers.get('Content-Length', 0))
-            body = self.rfile.read(content_length)
-            data = json.loads(body.decode('utf-8'))
+            body = self.rfile.read(content_length) if content_length > 0 else b''
+            data = json.loads(body.decode('utf-8')) if body else {}
+
+            logger.debug(f"Request data: {str(data)[:200]}")  # Log first 200 chars of data
+
+            # Route handling
+            if parsed_path == '/abrir-pasta':
+                logger.info("Handling /abrir-pasta request")
+                self.handle_abrir_pasta(data)
+            elif parsed_path == '/api/bids/create-folder':
+                logger.info("Handling /api/bids/create-folder request")
+                self.handle_create_folder(data)
+            elif parsed_path == '/api/bids/set-base-path':
+                logger.info("Handling /api/bids/set-base-path request")
+                self.handle_set_base_path(data)
+            elif parsed_path == '/api/bids/open-file':
+                logger.info("Handling /api/bids/open-file request")
+                self.handle_open_file(data)
+            else:
+                logger.warning(f"Unknown endpoint: {parsed_path}")
+                self.send_json_response({'error': f'Endpoint not found: {parsed_path}'}, 404)
+
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error: {str(e)}")
+            self.send_json_response({'error': 'Invalid JSON'}, 400)
+        except Exception as e:
+            logger.error(f"Server error: {str(e)}", exc_info=True)
+            self.send_json_response({'error': f'Server error: {str(e)}'}, 500)
+    
+    def handle_abrir_pasta(self, data):
+        """Handle POST /abrir-pasta - Opens a file or folder"""
+        file_path = data.get('filePath', '')
+        
+        if not file_path:
+            logger.warning("Requisição recebida sem filePath")
+            self.send_json_response({'error': 'filePath is required'}, 400)
+            return
+        
+        # Normalize path
+        file_path = os.path.normpath(file_path)
+        
+        # Check if path exists
+        if not os.path.exists(file_path):
+            logger.warning(f"Caminho não existe: {file_path}")
+            self.send_json_response({'error': f'Path does not exist: {file_path}'}, 400)
+            return
+        
+        # Open the file/folder based on platform
+        system = platform.system()
+        
+        try:
+            if system == 'Windows':
+                os.startfile(file_path)
+            elif system == 'Darwin':
+                subprocess.Popen(['open', file_path])
+            else:
+                subprocess.Popen(['xdg-open', file_path])
             
-            file_path = data.get('filePath', '')
+            logger.info(f"Aberto com sucesso: {file_path}")
+            self.send_json_response({
+                'success': True,
+                'message': f'Opened: {file_path}'
+            })
+        
+        except Exception as e:
+            logger.error(f"Erro ao abrir arquivo: {str(e)}")
+            self.send_json_response({'error': f'Failed to open: {str(e)}'}, 500)
+    
+    def handle_create_folder(self, data):
+        """Handle POST /api/bids/create-folder - Creates bid folder structure"""
+        base_path = data.get('basePath', '')
+        bid = data.get('bid', {})
+
+        logger.info(f"handle_create_folder called with basePath={base_path}, bidNumber={bid.get('bidNumber')}")
+
+        if not base_path or not bid:
+            logger.warning("Missing required fields in create-folder request")
+            self.send_json_response({'error': 'Missing required fields'}, 400)
+            return
+        
+        try:
+            # Verify basePath exists and is writable
+            logger.info(f"Checking if base path exists: {base_path}")
+            base_path_exists = os.path.exists(base_path)
+            logger.info(f"Base path exists: {base_path_exists}")
+
+            if not base_path_exists:
+                logger.error(f"Base path does not exist: {base_path}")
+                return self.send_json_response({
+                    'error': 'Base path does not exist',
+                    'details': f'O caminho configurado não existe: {base_path}'
+                }, 400)
             
-            if not file_path:
-                logger.warning("Requisição recebida sem filePath")
-                self.wfile.write(json.dumps({
-                    'error': 'filePath is required'
-                }).encode())
-                return
+            # Test write access
+            test_file = os.path.join(base_path, f".write-test-{int(datetime.now().timestamp() * 1000)}")
+            try:
+                with open(test_file, 'w') as f:
+                    f.write('test')
+                os.remove(test_file)
+            except Exception:
+                return self.send_json_response({
+                    'error': 'Permission denied writing to base path',
+                    'details': f'Sem permissão de escrita em: {base_path}'
+                }, 403)
             
+            # Validate bid data
+            if not bid.get('bidNumber') or not bid.get('year'):
+                return self.send_json_response({
+                    'error': 'Invalid bid data',
+                    'details': 'Número da licitação e ano são obrigatórios'
+                }, 400)
+            
+            # Create folder structure: basePath/YEAR/STATE/CITY/BIDNUMBER
+            path_parts = [base_path, str(bid['year'])]
+            
+            if bid.get('state'):
+                path_parts.append(bid['state'].upper())
+            
+            if bid.get('city'):
+                path_parts.append(bid['city'])
+            
+            path_parts.append(bid['bidNumber'])
+            
+            bid_folder_path = os.path.join(*path_parts)
+            docs_path = os.path.join(bid_folder_path, "Docs")
+            anexos_path = os.path.join(bid_folder_path, "Anexos")
+            
+            # Create directories
+            if not os.path.exists(bid_folder_path):
+                logger.info(f"Creating bid folder: {bid_folder_path}")
+                os.makedirs(bid_folder_path, exist_ok=True)
+            
+            if not os.path.exists(docs_path):
+                logger.info(f"Creating docs folder: {docs_path}")
+                os.makedirs(docs_path, exist_ok=True)
+            
+            if not os.path.exists(anexos_path):
+                logger.info(f"Creating anexos folder: {anexos_path}")
+                os.makedirs(anexos_path, exist_ok=True)
+            
+            # Save notes if provided
+            if bid.get('notes'):
+                notes_path = os.path.join(docs_path, "Diario_do_Processo.txt")
+                with open(notes_path, 'w', encoding='utf-8') as f:
+                    f.write(f"Diário do Processo da Licitação {bid['bidNumber']}\n")
+                    f.write(f"Criado em: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n\n")
+                    f.write(bid['notes'])
+            
+            # Save attachments
+            saved_attachments = []
+            if bid.get('attachments'):
+                for att in bid['attachments']:
+                    try:
+                        folder_name = ATTACHMENT_FOLDERS.get(att.get('type'), ATTACHMENT_FOLDERS['outro'])
+                        type_path = os.path.join(anexos_path, folder_name)
+                        
+                        if not os.path.exists(type_path):
+                            os.makedirs(type_path, exist_ok=True)
+                        
+                        # Handle base64 encoded files
+                        if att.get('url', '').startswith('data:'):
+                            base64_data = att['url'].split(',')[1] if ',' in att['url'] else ''
+                            if base64_data:
+                                file_path = os.path.join(type_path, att['name'])
+                                
+                                if not os.path.exists(file_path):
+                                    with open(file_path, 'wb') as f:
+                                        f.write(base64.b64decode(base64_data))
+                                    saved_attachments.append({
+                                        'name': att['name'],
+                                        'type': att['type'],
+                                        'isNew': True
+                                    })
+                                    logger.info(f"Saved attachment: {file_path}")
+                                else:
+                                    saved_attachments.append({
+                                        'name': att['name'],
+                                        'type': att['type'],
+                                        'isNew': False
+                                    })
+                    except Exception as att_error:
+                        logger.error(f"Error saving attachment {att.get('name')}: {str(att_error)}")
+                        continue
+            
+            new_count = sum(1 for a in saved_attachments if a['isNew'])
+            existing_count = sum(1 for a in saved_attachments if not a['isNew'])
+            
+            message = f"Pasta da licitação processada com sucesso"
+            if new_count > 0:
+                message += f" ({new_count} novos anexos salvos)"
+            if existing_count > 0:
+                message += f" ({existing_count} anexos já existentes)"
+            
+            logger.info(f"Folder creation success: {message}")
+            
+            self.send_json_response({
+                'success': True,
+                'bidFolderPath': bid_folder_path,
+                'docsPath': docs_path,
+                'anexosPath': anexos_path,
+                'attachmentsSaved': new_count,
+                'attachmentsSkipped': existing_count,
+                'message': message,
+            })
+        
+        except Exception as e:
+            logger.error(f"Error creating folder: {str(e)}")
+            self.send_json_response({'error': f'Failed to create bid folder: {str(e)}'}, 500)
+    
+    def handle_set_base_path(self, data):
+        """Handle POST /api/bids/set-base-path - Validates and sets base path"""
+        base_path = data.get('basePath', '')
+        
+        if not base_path:
+            return self.send_json_response({'error': 'Base path is required'}, 400)
+        
+        try:
+            # Verify the path exists or create it
+            if not os.path.exists(base_path):
+                os.makedirs(base_path, exist_ok=True)
+            
+            # Verify it's a directory
+            if not os.path.isdir(base_path):
+                return self.send_json_response({'error': 'Base path is not a directory'}, 400)
+            
+            logger.info(f"Base path set successfully: {base_path}")
+            
+            self.send_json_response({
+                'success': True,
+                'basePath': base_path,
+                'message': 'Base path set successfully',
+            })
+        
+        except Exception as e:
+            logger.error(f"Error setting base path: {str(e)}")
+            self.send_json_response({'error': f'Failed to set base path: {str(e)}'}, 500)
+    
+    def handle_open_file(self, data):
+        """Handle POST /api/bids/open-file - Opens file or folder in explorer"""
+        file_path = data.get('filePath', '')
+        
+        if not file_path:
+            return self.send_json_response({'error': 'File path is required'}, 400)
+        
+        try:
             # Normalize path
             file_path = os.path.normpath(file_path)
             
-            # Check if path exists
-            if not os.path.exists(file_path):
-                logger.warning(f"Caminho não existe: {file_path}")
-                self.wfile.write(json.dumps({
-                    'error': f'Path does not exist: {file_path}'
-                }).encode())
-                return
+            # Determine if it's a file or directory
+            is_directory = True
+            try:
+                if os.path.exists(file_path):
+                    is_directory = os.path.isdir(file_path)
+            except Exception:
+                pass  # Assume directory for network paths
             
-            # Open the file/folder based on platform
             system = platform.system()
             
-            try:
-                if system == 'Windows':
-                    # Use os.startfile on Windows (native and simple)
+            if system == 'Windows':
+                if is_directory:
                     os.startfile(file_path)
-                elif system == 'Darwin':
-                    # macOS: use open command
-                    subprocess.Popen(['open', file_path])
                 else:
-                    # Linux: use xdg-open or nautilus
-                    subprocess.Popen(['xdg-open', file_path])
-                
-                logger.info(f"Aberto com sucesso: {file_path}")
-                self.wfile.write(json.dumps({
-                    'success': True,
-                    'message': f'Opened: {file_path}'
-                }).encode())
+                    os.startfile(os.path.dirname(file_path))
+            elif system == 'Darwin':
+                subprocess.Popen(['open', '-R' if not is_directory else '', file_path])
+            else:
+                subprocess.Popen(['xdg-open', os.path.dirname(file_path) if not is_directory else file_path])
             
-            except Exception as e:
-                logger.error(f"Erro ao abrir arquivo: {str(e)}")
-                self.wfile.write(json.dumps({
-                    'error': f'Failed to open: {str(e)}'
-                }).encode())
+            msg_type = "Folder" if is_directory else "File"
+            logger.info(f"{msg_type} opened successfully: {file_path}")
+            
+            self.send_json_response({
+                'success': True,
+                'message': f'{msg_type} opened successfully',
+            })
         
         except Exception as e:
-            logger.error(f"Erro no servidor: {str(e)}")
-            self.wfile.write(json.dumps({
-                'error': f'Server error: {str(e)}'
-            }).encode())
+            logger.error(f"Error opening file: {str(e)}")
+            self.send_json_response({'error': f'Failed to open file: {str(e)}'}, 500)
     
     def log_message(self, format, *args):
         """Override to customize log messages"""
@@ -145,7 +390,6 @@ class OpenFileHandler(http.server.SimpleHTTPRequestHandler):
 
 def create_icon():
     """Criar ícone para a bandeja do Windows"""
-    # Criar uma imagem simples (azul com letra S)
     width, height = 64, 64
     image = Image.new('RGB', (width, height), color='#0066CC')
     draw = ImageDraw.Draw(image)
@@ -169,14 +413,17 @@ def start_server():
         return
     
     try:
-        Handler = OpenFileHandler
-        server = socketserver.TCPServer(("", PORT), Handler)
+        server = socketserver.TCPServer(("", PORT), APIHandler)
         is_running = True
         
         logger.info("=" * 60)
         logger.info("🚀 Servidor Local iniciado")
         logger.info(f"📁 Ouvindo em http://localhost:{PORT}")
-        logger.info(f"✅ Pronto para abrir arquivos e pastas")
+        logger.info(f"✅ Endpoints disponíveis:")
+        logger.info(f"   • POST /abrir-pasta")
+        logger.info(f"   • POST /api/bids/create-folder")
+        logger.info(f"   • POST /api/bids/set-base-path")
+        logger.info(f"   • POST /api/bids/open-file")
         logger.info("=" * 60)
         
         # Rodar o servidor em thread separada
