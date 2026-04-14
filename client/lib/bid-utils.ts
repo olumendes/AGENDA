@@ -15,6 +15,11 @@ export function getBidColor(status: BidStatus) {
       text: "text-white",
       bgLight: "bg-status-codificado-light text-status-codificado",
     },
+    nao_codificado_flamingo: {
+      bg: "bg-status-nao_codificado_flamingo",
+      text: "text-white",
+      bgLight: "bg-status-nao_codificado_flamingo-light text-status-nao_codificado_flamingo",
+    },
     questionamento: {
       bg: "bg-status-questionamento",
       text: "text-white",
@@ -49,6 +54,7 @@ export function getStatusLabel(status: BidStatus): string {
   const labels: Record<BidStatus, string> = {
     cadastrado: "Cadastrado",
     codificado: "Codificado",
+    nao_codificado_flamingo: "Não codificado flamingo",
     questionamento: "Questionamento",
     suspenso: "Suspenso",
     won: "Ganho",

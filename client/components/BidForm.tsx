@@ -63,7 +63,7 @@ const BID_TYPE_LABELS: Record<BidType, string> = {
   pregao_presencial: "Pregão Presencial",
 };
 
-const STATUS_OPTIONS: BidStatus[] = ["cadastrado", "codificado", "questionamento", "suspenso", "won", "lost", "nao_temos"];
+const STATUS_OPTIONS: BidStatus[] = ["cadastrado", "codificado", "nao_codificado_flamingo", "questionamento", "suspenso", "won", "lost", "nao_temos"];
 
 function calculateStatusFromItems(items: {
   itemsRegistered: BidItem[];

@@ -49,7 +49,7 @@ const BRAZILIAN_STATES = [
   "TO",
 ];
 
-const STATUS_OPTIONS: BidStatus[] = ["cadastrado", "codificado", "questionamento", "suspenso", "won", "lost", "nao_temos"];
+const STATUS_OPTIONS: BidStatus[] = ["cadastrado", "codificado", "nao_codificado_flamingo", "questionamento", "suspenso", "won", "lost", "nao_temos"];
 
 export default function BidsCalendar() {
   const navigate = useNavigate();
