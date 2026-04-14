@@ -66,6 +66,15 @@ function buildAttachmentPath(bid: Bid, attachment: BidAttachment): string {
   return filePath;
 }
 
+function buildBidFolderPath(bid: Bid): string {
+  const settings = settingsStorage.getSettings();
+  const basePath = settings.rootPath;
+
+  const folderPath = `${basePath}/${bid.year}/${bid.state.toUpperCase()}/${bid.city}/${bid.bidNumber}`;
+
+  return folderPath;
+}
+
 export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -89,6 +98,29 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
     } catch (error) {
       console.error("Error opening file:", error);
       alert("Erro ao abrir arquivo");
+    } finally {
+      setIsOpeningFile(false);
+    }
+  };
+
+  const handleOpenBidFolder = async () => {
+    try {
+      setIsOpeningFile(true);
+      const folderPath = buildBidFolderPath(bid);
+
+      const response = await fetch("/api/bids/open-file", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filePath: folderPath }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Erro ao abrir pasta: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error opening folder:", error);
+      alert("Erro ao abrir pasta do processo");
     } finally {
       setIsOpeningFile(false);
     }
@@ -132,6 +164,15 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
               <p className="opacity-90 text-sm">{bid.observation}</p>
             </div>
             <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleOpenBidFolder}
+                disabled={isOpeningFile}
+              >
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Pasta
+              </Button>
               <Button
                 size="sm"
                 variant="secondary"
