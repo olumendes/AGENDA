@@ -49,6 +49,19 @@ export const handleCreateBidFolder: RequestHandler = (req, res) => {
           details: `O caminho configurado não existe: ${basePath}`
         });
       }
+
+      // Test write access
+      const testFile = path.join(basePath, ".write-test-" + Date.now());
+      try {
+        fs.writeFileSync(testFile, "test");
+        fs.unlinkSync(testFile);
+      } catch {
+        return res.status(403).json({
+          error: "Permission denied writing to base path",
+          details: `Sem permissão de escrita em: ${basePath}. Verifique se:\n1. A pasta está acessível\n2. Você tem permissão de escrita\n3. A unidade de rede está conectada`,
+          path: basePath
+        });
+      }
     } catch (checkError) {
       return res.status(403).json({
         error: "Permission denied accessing base path",
