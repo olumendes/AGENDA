@@ -231,7 +231,8 @@ export const handleOpenFile: RequestHandler = (req, res) => {
     }
 
     try {
-      execSync(command, { stdio: "ignore", shell: "/bin/bash" });
+      const shellOption = platform === "win32" ? "cmd.exe" : undefined;
+      execSync(command, { stdio: "ignore", shell: shellOption });
       res.json({
         success: true,
         message: isDirectory ? "Folder opened successfully" : "File opened in explorer successfully",
