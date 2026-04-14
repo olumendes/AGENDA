@@ -1,27 +1,20 @@
-name = "agenda-app"
-main = "functions/_app.ts"
+name = "licitacaoagenda"
 type = "javascript"
 compatibility_date = "2024-12-16"
-
-# Build configuration
-build = { command = "npm run build", cwd = "." }
-
-# Routes
-env = "production"
-workers_dev = true
 
 # Pages configuration
 pages_build_output_dir = "dist/spa"
 
-# KV Storage (opcional, para cache)
-[[kv_namespaces]]
-binding = "CACHE_KV"
-id = "default_kv"
-preview_id = "preview_kv"
+# Build configuration
+build = { command = "npm run build", cwd = "." }
 
 # Environment variables
 [env.production]
+name = "licitacaoagenda"
+pages_build_output_dir = "dist/spa"
 vars = { ENVIRONMENT = "production" }
 
 [env.staging]
+name = "licitacaoagenda-staging"
+pages_build_output_dir = "dist/spa"
 vars = { ENVIRONMENT = "staging" }

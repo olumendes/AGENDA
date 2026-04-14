@@ -1,14 +1,17 @@
-[build]
-command = "npm run build"
-functions = "netlify/functions"
-publish = "dist/spa"
-
-
-[functions]
-external_node_modules = ["express"]
-node_bundler = "esbuild"
-[[redirects]]
-force = true
-from = "/api/*"
-status = 200
-to = "/.netlify/functions/api/:splat"
+# Este arquivo é para Netlify e NÃO é usado
+# O projeto está hospedado em Cloudflare Pages
+# Ver wrangler.toml para configuração de Cloudflare
+#
+# [build]
+# command = "npm run build"
+# functions = "netlify/functions"
+# publish = "dist/spa"
+#
+# [functions]
+# external_node_modules = ["express"]
+# node_bundler = "esbuild"
+# [[redirects]]
+# force = true
+# from = "/api/*"
+# status = 200
+# to = "/.netlify/functions/api/:splat"
