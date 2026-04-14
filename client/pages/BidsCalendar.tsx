@@ -202,16 +202,11 @@ export default function BidsCalendar() {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="w-80 border-r border-gray-200 bg-white flex flex-col">
-        {/* Header */}
-        <div className="border-b border-gray-200 p-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Licitações</h1>
-          <p className="text-sm text-gray-600">Gestão de Licitações Públicas</p>
-        </div>
-
-        {/* Action Buttons */}
+    <div className="flex flex-col h-screen bg-gray-50">
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <div className="w-80 border-r border-gray-200 bg-white flex flex-col">
+          {/* Action Buttons */}
         <div className="p-4 border-b border-gray-200 space-y-2">
           <Button
             onClick={() => setIsCreating(true)}
@@ -459,7 +454,13 @@ export default function BidsCalendar() {
             onNewBid={() => setIsCreating(true)}
           />
         )}
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 py-3 px-6 text-center text-sm text-gray-600">
+        Feito por Luan Mendes
+      </footer>
     </div>
   );
 }

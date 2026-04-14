@@ -139,6 +139,41 @@ export function BidDetail({ bid, onEdit, onDelete, onClose }: BidDetailProps) {
                 <p className="font-semibold">{bid.portal}</p>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-500">
+                  Codigo Effecti
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="font-semibold">{bid.codigoEffecti || "-"}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-500">
+                  UASG
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="font-semibold">{bid.uasg || "-"}</p>
+              </CardContent>
+            </Card>
+
+            {bid.portal === "LICITACOES-E" && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-500">
+                    Codigo Banco do Brasil
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="font-semibold">{bid.codigoBancoDoBrasil || "-"}</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Location Info */}

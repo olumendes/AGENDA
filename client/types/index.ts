@@ -18,6 +18,9 @@ export interface Bid {
   disputeDate: Date;
   disputeTime: string; // HH:mm format
   portal: string;
+  codigoEffecti: string;
+  uasg: string;
+  codigoBancoDoBrasil?: string;
   status: BidStatus;
   year: number;
   state: string;
